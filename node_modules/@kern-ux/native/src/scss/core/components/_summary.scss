@@ -1,0 +1,65 @@
+@use "../utilities/mixins";
+
+/**
+ * @file _summary.scss
+ * @author Darko Pervan, darko.pervan@dataport.de / KERN-Team
+ * @author Tom Marienfeld, tom.marienfeld@dataport.de / KERN-Team
+ * @date 16.12.2024
+ * @modified 30.07.2025
+ * @@VERSION@@
+ * @brief Styles für die Summary Komponente.
+ *
+ * Diese Datei enthält die CSS-Regeln, um die Summary Komponente
+ * visuell darzustellen. Sie definiert das Grundaussehen.
+ */
+
+.kern-summary-group {
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    padding: var(--kern-metric-baseline-heading-medium-padding-top, 8px)
+      var(--kern-metric-space-none, 0px)
+      calc(
+        var(--kern-metric-baseline-heading-medium-padding-bottom, 8px) +
+          var(--kern-metric-space-default, 16px)
+      )
+      var(--kern-metric-space-none, 0px);
+
+    margin-top: var(--kern-metric-space-x-large, 32px);
+
+    &:first-of-type {
+      margin-top: var(--kern-metric-space-none, 0px);
+    }
+  }
+}
+
+.kern-summary {
+  &__header {
+    display: flex;
+    padding: var(--kern-metric-space-default, 16px) var(--skern-pace-none, 0px);
+    align-items: flex-start;
+    gap: var(--kern-metric-space-small, 8px)
+      var(--kern-metric-space-default, 16px);
+    align-self: stretch;
+
+    .kern-number {
+      margin-top: var(--kern-metric-space-x-small, 4px);
+    }
+  }
+
+  .kern-title {
+    font-weight: var(--kern-typography-font-weight-regular, 400);
+  }
+
+  &__body {
+    display: flex;
+    padding: var(--kern-metric-space-default, 16px);
+    flex-direction: column;
+    gap: var(--kern-metric-space-x-large, 32px);
+    border-radius: var(--kern-metric-border-radius-default, 4px);
+    background: var(--kern-color-layout-background-hued, #f7f7f9);
+    @include mixins.forced-colors-border-1px;
+  }
+}

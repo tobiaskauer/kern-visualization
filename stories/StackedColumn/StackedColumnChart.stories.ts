@@ -1,0 +1,41 @@
+import type { Meta, StoryObj } from '@storybook/html';
+import { StackedColumnChart } from '../../src/charts/stacked-bar/stacked-column-chart';
+
+const meta: Meta = {
+  title: 'Charts/StackedColumnChart',
+};
+
+export default meta;
+
+const series = ['Direkt', 'Organisch', 'Referral'];
+const sampleData = [
+  { label: 'Jan', Direkt: 20, Organisch: 15, Referral: 7 },
+  { label: 'Feb', Direkt: 25, Organisch: 20, Referral: 10 },
+  { label: 'Mär', Direkt: 18, Organisch: 12, Referral: 5 },
+  { label: 'Apr', Direkt: 30, Organisch: 25, Referral: 12 },
+];
+
+function createChart(config: any): HTMLElement {
+  const container = document.createElement('div');
+  container.style.width = '600px';
+  container.style.height = '300px';
+
+  requestAnimationFrame(() => {
+    const chart = new StackedColumnChart({
+      container,
+      data: config.data ?? sampleData,
+      series: config.series ?? series,
+      title: 'Stacked Column',
+      animated: true,
+      margin: { top: 20, right: 20, bottom: 40, left: 80 },
+    });
+    chart.render();
+  });
+
+  return container;
+}
+
+export const Default: StoryObj = {
+  render: () => createChart({}),
+  name: 'Default',
+};

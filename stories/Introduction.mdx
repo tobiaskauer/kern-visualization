@@ -1,0 +1,34 @@
+---
+title: Introduction
+---
+
+# KERN Visualization
+
+Data visualization components for the KERN UX design system.
+
+Built with vanilla TypeScript and D3.js, these components read KERN CSS custom properties directly, ensuring they always reflect the current theme (light/dark) without any extra configuration.
+
+## Usage
+
+```ts
+import { BarChart } from 'kern-visualization';
+
+const chart = new BarChart({
+  container: document.getElementById('chart')!,
+  data: [{ label: 'Jan', value: 42 }],
+  title: 'Monthly totals',
+  animated: true,
+});
+chart.render();
+```
+
+## Charts
+
+- **BarChart** — vertical bars
+- **ColumnChart** — horizontal bars
+- **StackedBarChart** — stacked vertical bars
+- **StackedColumnChart** — stacked horizontal bars
+- **LineChart** — multi-series line chart
+- **AreaChart** — area chart with optional fill
+- **StackedAreaChart** — stacked area chart
+- **ScatterChart** — scatter plot

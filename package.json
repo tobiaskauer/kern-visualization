@@ -1,0 +1,25 @@
+{
+  "name": "kern-visualization",
+  "version": "0.1.0",
+  "description": "Data visualization components for the KERN UX design system",
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev -p 6007",
+    "build": "vite build",
+    "storybook": "storybook dev -p 6007",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "d3": "^7"
+  },
+  "devDependencies": {
+    "@kern-ux/native": "file:../kern-ux-plain",
+    "@storybook/addon-a11y": "^9",
+    "@storybook/addon-docs": "^9",
+    "@storybook/html-vite": "^9",
+    "@types/d3": "^7",
+    "storybook": "^9",
+    "typescript": "^5",
+    "vite": "^5"
+  }
+}

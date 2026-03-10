@@ -1,0 +1,91 @@
+/**
+ * @file _checkbox.scss
+ * @author Darko Pervan, darko.pervan@dataport.de / KERN-Team
+ * @author Tom Marienfeld, tom.marienfeld@dataport.de / KERN-Team
+ * @date 16.12.2024
+ * @modified 30.07.2025
+ * @@VERSION@@
+ * @brief Styles für die Checkbox Komponente.
+ *
+ * Diese Datei enthält, von der _check.scss abweichende, CSS-Regeln, um die Checkbox Komponente
+ * visuell darzustellen.
+ */
+
+@use '../utilities/functions';
+@use "sass:map";
+
+.kern-form-check {
+    &__checkbox {
+        border-radius: var(--kern-metric-border-radius-small, 2px);
+
+        &::before {
+            content: "";
+        }
+
+        &:focus,
+        &:focus-visible {
+            &::before {
+                margin: var(--kern-6, 6px);
+            }
+        }
+
+        &:checked {
+            &::before {
+                display: block;
+                position: relative;
+                left: var(--kern-3, 3px);
+                top: var(--kern-8, 8px);
+                transform: rotate(47deg) translate(-50%, -50%);
+                background-color: transparent;
+                border-width: var(--kern-metric-space-none, 0px) var(--kern-metric-border-width-default, 2px) var(--kern-metric-border-width-default, 2px) var(--kern-metric-space-none, 0px);
+                border-color: var(--kern-color-form-input-border, #171A2B);
+                border-style: solid;
+                height: var(--kern-metric-dimension-x-small, 16px);
+                width: var(--kern-metric-dimension-2x-small, 8px);
+                margin: 4px;
+            }
+
+            &:hover {
+                &::before {
+                    margin: var(--kern-metric-space-2x-small, 2px);
+                }
+            }
+
+            &:focus,
+            &:focus-visible {
+                &::before {
+                    margin: var(--kern-6, 6px);
+                }
+            }
+        }
+
+        &--error {
+            border-color: var(--kern-color-feedback-danger, #BD0F09) !important;
+            outline-color: var(--kern-color-feedback-danger, #BD0F09) !important;
+            background: var(--kern-color-feedback-danger-background, #FEECE8);
+
+            &:checked {
+                &::before {
+                    border-color: var(--kern-color-feedback-danger, #BD0F09);
+                    @media (forced-colors: active) {
+                        border-color: var(--kern-color-layout-background-inverted) !important;
+                    }
+                }
+
+                &:focus,
+                &:focus-visible {
+                    box-shadow: 0 0 0 var(--kern-metric-border-width-bold, 4px) var(--kern-color-feedback-danger, #BD0F09);
+                    outline: var(--kern-metric-border-width-none, 0px);
+                    border: var(--kern-metric-border-width-none, 0px);
+                }
+            }
+
+            &:focus,
+            &:focus-visible {
+                box-shadow: 0 0 0 var(--kern-metric-border-width-bold, 4px) var(--kern-color-feedback-danger, #BD0F09);
+                outline: var(--kern-metric-border-width-none, 0px);
+                border: var(--kern-metric-border-width-none, 0px);
+            }
+        }
+    }
+}

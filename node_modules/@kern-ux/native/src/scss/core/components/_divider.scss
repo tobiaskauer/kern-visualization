@@ -1,0 +1,22 @@
+@use "../utilities/mixins";
+
+/**
+ * @file _divider.scss
+ * @author Darko Pervan, darko.pervan@dataport.de / KERN-Team
+ * @author Tom Marienfeld, tom.marienfeld@dataport.de / KERN-Team
+ * @date 16.12.2024
+ * @modified 30.07.2025
+ * @@VERSION@@
+ * @brief Styles für die Divider Komponente.
+ *
+ * Diese Datei enthält die CSS-Regeln, um die Divider Komponente
+ * visuell darzustellen. Sie definiert das Grundaussehen.
+ */
+
+.kern-divider {
+    border: var(--kern-metric-border-radius-none, 0px);
+    margin: var(--kern-metric-space-none, 0px);
+    height: var(--kern-metric-border-width-light, 1px);
+    background-color: var(--kern-color-layout-border, #A5AAC3);
+    @include mixins.forced-colors-style;
+}

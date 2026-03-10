@@ -1,0 +1,151 @@
+/**
+ * @file _task-list.scss
+ * @author Darko Pervan, darko.pervan@dataport.de / KERN-Team
+ * @author Tom Marienfeld, tom.marienfeld@dataport.de / KERN-Team
+ * @date 16.12.2024
+ * @modified 30.07.2025
+ * @@VERSION@@
+ * @brief Styles für die Tasklist-Komponente.
+ *
+ * Diese Datei enthält die CSS-Regeln, um die Tasklist-Komponente
+ * visuell darzustellen. Sie definiert das Grundaussehen,
+ * Zustände (:hover, :active, :focus) und mögliche
+ */
+
+@use "sass:map";
+@use '../utilities/maps';
+@use "../utilities/mixins";
+
+.kern-task-list {
+  display: block;
+
+  &-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--kern-metric-space-x-large, 32px);
+  }
+
+  &__header {
+    display: flex;
+    padding-bottom: var(--kern-metric-space-default, 16px);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--kern-metric-space-default, 16px);
+    align-self: stretch;
+
+    margin-top: var(--kern-metric-space-x-large, 32px);
+
+    &:first-of-type {
+      margin-top: var(--kern-metric-space-none, 0px);
+    }
+
+    .kern-heading {
+      display: flex;
+      padding: var(--kern-metric-baseline-heading-medium-padding-top, 5px) var(--kern-metric-space-none, 0px) var(--kern-metric-baseline-heading-medium-padding-bottom, 3px) var(--kern-metric-space-none, 0px);
+      align-items: flex-start;
+      gap: var(--kern-metric-space-none, 0px);
+      align-self: stretch;
+
+      @include mixins.heading-medium;
+    }
+  }
+
+  &__list {
+    @include mixins.normalize;
+    display: flex;
+    flex-direction: column;
+    gap: var(--kern-metric-space-small, 8px);
+    align-self: stretch;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    padding: var(--kern-metric-space-small, 8px) var(--kern-metric-space-default, 16px);
+    align-items: flex-start;
+    gap: var(--kern-metric-space-default, 16px);
+    flex: 1 0 0;
+    justify-content: space-between;
+    position: relative;
+
+    border-radius: var(--kern-metric-border-radius-default, 4px);
+    background: var(--kern-color-layout-background-hued, #F7F7F9);
+    @include mixins.forced-colors-border-1px;
+
+    .kern-number {
+      margin-top: var(--kern-12, 12px);
+    }
+
+    &:has(.kern-link) {
+      color: var(--kern-color-action-default, #1A3DA5);
+
+      .kern-number {
+        color: var(--kern-color-action-default, #1A3DA5);
+        border-color: var(--kern-color-action-default, #1A3DA5);
+      }
+    }
+
+    .kern-link--stretched {
+      &:after {
+        position: absolute;
+        top: var(--kern-metric-space-none, 0px);
+        right: var(--kern-metric-space-none, 0px);
+        bottom: var(--kern-metric-space-none, 0px);
+        left: var(--kern-metric-space-none, 0px);
+        z-index: 1;
+        pointer-events: auto;
+        content: "";
+        background-color: transparent;
+      }
+
+      &:focus-visible {
+        outline-color: transparent;
+
+        &:after {
+          border-radius: var(--kern-metric-border-radius-default, 0.25rem);
+          box-shadow: var(--kern-metric-space-none, 0px) var(--kern-metric-space-none, 0px) var(--kern-metric-space-none, 0px) 2px var(--kern-color-action-on-default), // TODO: Variable mit Design überprüfen
+            var(--kern-metric-space-none, 0px) var(--kern-metric-space-none, 0px) var(--kern-metric-space-none, 0px) 4px var(--kern-color-action-focus-border-inside),
+            var(--kern-metric-space-none, 0px) var(--kern-metric-space-none, 0px) var(--kern-metric-space-none, 0px) 6px var(--kern-color-action-focus-border-outside);
+
+        }
+      }
+    }
+
+    &:has(.kern-link--stretched:hover) {
+      background: var(--kern-color-action-state-indicator-tint-hover-opacity);
+    }
+
+    &:has(.kern-link--stretched:active) {
+      background: var(--kern-color-action-state-indicator-tint-active-opacity);
+    }
+  }
+
+  &__title {
+    display: flex;
+    padding: var(--kern-metric-space-small, 8px) var(--kern-metric-space-none, 0px);
+    align-items: flex-start;
+    gap: var(--kern-metric-space-default, 16px);
+    flex-grow: 1;
+    flex-wrap: wrap;
+
+    @media all and (min-width: map.get(maps.$grid-breakpoints, md)) {
+      flex-wrap: nowrap;
+    }
+
+    .kern-link {
+      &:visited {
+        color: var(--kern-color-action-default, #1A3DA5);
+      }
+    }
+
+    .kern-link,
+    .kern-body {
+      flex-grow: 1;
+    }
+  }
+
+  &__status {
+    text-align: right;
+    white-space: nowrap;
+  }
+}

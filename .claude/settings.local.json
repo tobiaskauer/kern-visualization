@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew list:*)",
+      "Bash(ls /Users/tobiaskauer/Projects/kern-ux-plain/node_modules/.bin/vite 2>/dev/null && /Users/tobiaskauer/Projects/kern-ux-plain/node_modules/.bin/vite --version 2>&1 || echo \"no local vite\")",
+      "Bash(which sass:*)",
+      "Bash(sass --version && ls /Users/tobiaskauer/Projects/kern-ux-plain/src/scss/)",
+      "Bash(sass /Users/tobiaskauer/Projects/kern-ux-plain/src/scss/themes/kern/index.scss /Users/tobiaskauer/Projects/kern-ux-plain/dist/kern.css 2>&1 | tail -5 && echo \"Done\" && ls /Users/tobiaskauer/Projects/kern-ux-plain/dist/kern.css)",
+      "Bash(node --version && npm install 2>&1)",
+      "Bash(npm run:*)",
+      "Bash(brew info:*)",
+      "Bash(brew install:*)",
+      "Bash(wait && cat /private/tmp/claude-501/-Users-tobiaskauer-Projects-kern-visualization/tasks/bofiqhfk4.output | tail -20)",
+      "Bash(ls /opt/homebrew/Cellar/ | grep node && /opt/homebrew/opt/node@22/bin/node --version 2>/dev/null || echo \"node@22 not yet installed\")",
+      "Bash(/opt/homebrew/opt/node@22/bin/node --version 2>/dev/null || ls /opt/homebrew/Cellar/node@22/ 2>/dev/null)",
+      "Bash(cat /private/tmp/claude-501/-Users-tobiaskauer-Projects-kern-visualization/tasks/bofiqhfk4.output | tail -10 && /opt/homebrew/opt/node@22/bin/node --version)",
+      "Bash(node --version && /opt/homebrew/opt/node@20/bin/node --version 2>/dev/null || echo \"node@20 not available\")"
+    ]
+  }
+}
