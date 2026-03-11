@@ -9,6 +9,8 @@ export interface KernTokens {
   fontSizeSmall: string;
   spaceSmall: string;
   spaceDefault: string;
+  borderRadiusSmall: string;
+  spaceXSmall: string;
   chartColors: string[];
 }
 
@@ -30,6 +32,8 @@ export function getTokens(container: Element): KernTokens {
     fontSizeSmall: get('--kern-font-size-12'),
     spaceSmall: get('--kern-metric-space-small'),
     spaceDefault: get('--kern-metric-space-default'),
+    borderRadiusSmall: get('--kern-metric-border-radius-small') || '2px',
+    spaceXSmall: get('--kern-metric-space-x-small') || '4px',
     chartColors: [
       oklch('--kern-darkblue-600-lightness', '--kern-darkblue-600-chroma', '--kern-darkblue-600-hue'),
       oklch('--kern-turquoise-500-lightness', '--kern-turquoise-500-chroma', '--kern-turquoise-500-hue'),

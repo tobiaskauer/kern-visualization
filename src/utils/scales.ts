@@ -15,6 +15,14 @@ export function createBandScale(
   return d3.scaleBand().domain(domain).range(range).padding(padding);
 }
 
+export function createPointScale(
+  domain: string[],
+  range: [number, number],
+  padding = 0
+): d3.ScalePoint<string> {
+  return d3.scalePoint().domain(domain).range(range).padding(padding);
+}
+
 export function createOrdinalColorScale(
   domain: string[],
   colors: string[]

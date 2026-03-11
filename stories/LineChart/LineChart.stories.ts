@@ -39,6 +39,9 @@ function createChart(config: any): HTMLElement {
       series: config.series ?? sampleSeries,
       title: 'Quartalsvergleich',
       animated: true,
+      xAxisLabel: config.xAxisLabel,
+      yAxisLabel: config.yAxisLabel,
+      gridlines: config.gridlines,
     });
     chart.render();
   });
@@ -55,3 +58,9 @@ export const SingleSeries: StoryObj = {
   render: () => createChart({ series: [sampleSeries[0]] }),
   name: 'Single Series',
 };
+
+export const WithAxisLabels: StoryObj = {
+  render: () => createChart({ xAxisLabel: 'Quartal', yAxisLabel: 'Umsatz' }),
+  name: 'With Axis Labels',
+};
+

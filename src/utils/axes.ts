@@ -33,6 +33,45 @@ export function renderLeftAxis(
   styleAxis(g, options.tokens);
 }
 
+export function renderGridlinesY(
+  g: d3.Selection<SVGGElement, unknown, null, undefined>,
+  yScale: any,
+  innerWidth: number,
+  tokens: KernTokens
+): void {
+  const gridGroup = g.append('g').attr('class', 'gridlines');
+  const axis = d3.axisLeft(yScale).tickSize(-innerWidth).tickFormat('' as any);
+  gridGroup.call(axis);
+  gridGroup.select('.domain').remove();
+  gridGroup
+    .selectAll('.tick line')
+    .attr('stroke', tokens.colorBorder)
+    .attr('stroke-opacity', 0.5)
+    .attr('stroke-dasharray', '4,4');
+  gridGroup.selectAll('.tick text').remove();
+}
+
+export function renderGridlinesX(
+  g: d3.Selection<SVGGElement, unknown, null, undefined>,
+  xScale: any,
+  innerHeight: number,
+  tokens: KernTokens
+): void {
+  const gridGroup = g
+    .append('g')
+    .attr('class', 'gridlines')
+    .attr('transform', `translate(0,${innerHeight})`);
+  const axis = d3.axisBottom(xScale).tickSize(-innerHeight).tickFormat('' as any);
+  gridGroup.call(axis);
+  gridGroup.select('.domain').remove();
+  gridGroup
+    .selectAll('.tick line')
+    .attr('stroke', tokens.colorBorder)
+    .attr('stroke-opacity', 0.5)
+    .attr('stroke-dasharray', '4,4');
+  gridGroup.selectAll('.tick text').remove();
+}
+
 function styleAxis(
   g: d3.Selection<SVGGElement, unknown, null, undefined>,
   tokens: KernTokens

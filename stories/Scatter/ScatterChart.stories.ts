@@ -24,8 +24,9 @@ function createChart(config: any): HTMLElement {
       data: config.data ?? sampleData,
       groups: ['Gruppe A', 'Gruppe B'],
       title: 'Streudiagramm',
-      xAxisLabel: 'X-Achse',
-      yAxisLabel: 'Y-Achse',
+      xAxisLabel: config.xAxisLabel ?? 'X-Achse',
+      yAxisLabel: config.yAxisLabel ?? 'Y-Achse',
+      gridlines: config.gridlines,
     });
     chart.render();
   });

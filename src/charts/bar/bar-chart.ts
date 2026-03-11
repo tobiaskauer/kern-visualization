@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
 import { createBandScale, createLinearScale } from '../../utils/scales';
-import { renderBottomAxis, renderLeftAxis } from '../../utils/axes';
+import { renderBottomAxis, renderLeftAxis, renderGridlinesY } from '../../utils/axes';
+import { CHART_CONSTANTS } from '../../constants';
 
 export interface Datum {
   label: string;
@@ -11,8 +12,6 @@ export interface Datum {
 export interface BarChartConfig extends BaseChartConfig {
   data: Datum[];
   showValueLabels?: boolean;
-  xAxisLabel?: string;
-  yAxisLabel?: string;
 }
 
 export class BarChart extends BaseChart<BarChartConfig> {
@@ -43,6 +42,11 @@ export class BarChart extends BaseChart<BarChartConfig> {
       [innerHeight, 0]
     );
 
+    // Gridlines (before data layer)
+    if (this.config.gridlines?.y !== false) {
+      renderGridlinesY(g, yScale, innerWidth, this.tokens);
+    }
+
     // Bars
     const bars = g.selectAll<SVGRectElement, Datum>('rect').data(data);
 
@@ -52,14 +56,14 @@ export class BarChart extends BaseChart<BarChartConfig> {
       .attr('x', (d) => xScale(d.label) ?? 0)
       .attr('width', xScale.bandwidth())
       .attr('fill', this.tokens.chartColors[0])
-      .attr('rx', 2);
+      .attr('rx', parseFloat(this.tokens.borderRadiusSmall));
 
     if (this.config.animated) {
       enterBars
         .attr('y', innerHeight)
         .attr('height', 0)
         .transition()
-        .duration(400)
+        .duration(CHART_CONSTANTS.animationDuration)
         .attr('y', (d) => yScale(d.value))
         .attr('height', (d) => innerHeight - yScale(d.value));
     } else {
@@ -76,7 +80,7 @@ export class BarChart extends BaseChart<BarChartConfig> {
         .append('text')
         .attr('class', 'value-label')
         .attr('x', (d) => (xScale(d.label) ?? 0) + xScale.bandwidth() / 2)
-        .attr('y', (d) => yScale(d.value) - 4)
+        .attr('y', (d) => yScale(d.value) - parseFloat(this.tokens.spaceXSmall))
         .attr('text-anchor', 'middle')
         .attr('fill', this.tokens.colorTextMuted)
         .attr('font-family', this.tokens.fontFamily)
@@ -93,28 +97,6 @@ export class BarChart extends BaseChart<BarChartConfig> {
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
     );
 
-    // Axis labels
-    if (this.config.xAxisLabel) {
-      g.append('text')
-        .attr('x', innerWidth / 2)
-        .attr('y', innerHeight + (this.config.margin?.bottom ?? 40) - 4)
-        .attr('text-anchor', 'middle')
-        .attr('fill', this.tokens.colorTextMuted)
-        .attr('font-family', this.tokens.fontFamily)
-        .attr('font-size', this.tokens.fontSizeSmall || '12px')
-        .text(this.config.xAxisLabel);
-    }
-
-    if (this.config.yAxisLabel) {
-      g.append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('x', -innerHeight / 2)
-        .attr('y', -(this.config.margin?.left ?? 50) + 12)
-        .attr('text-anchor', 'middle')
-        .attr('fill', this.tokens.colorTextMuted)
-        .attr('font-family', this.tokens.fontFamily)
-        .attr('font-size', this.tokens.fontSizeSmall || '12px')
-        .text(this.config.yAxisLabel);
-    }
+    this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
   }
 }

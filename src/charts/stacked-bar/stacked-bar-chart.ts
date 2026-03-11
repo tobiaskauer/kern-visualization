@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
 import { createBandScale, createLinearScale, createOrdinalColorScale } from '../../utils/scales';
-import { renderBottomAxis, renderLeftAxis } from '../../utils/axes';
+import { renderBottomAxis, renderLeftAxis, renderGridlinesY } from '../../utils/axes';
 
 export interface StackedDatum {
   label: string;
@@ -43,6 +43,11 @@ export class StackedBarChart extends BaseChart<StackedBarChartConfig> {
     );
     const yScale = createLinearScale([0, maxVal], [innerHeight, 0]);
 
+    // Gridlines (before data layer)
+    if (this.config.gridlines?.y !== false) {
+      renderGridlinesY(g, yScale, innerWidth, this.tokens);
+    }
+
     const layer = g.selectAll('g.layer')
       .data(stackedData)
       .enter()
@@ -66,5 +71,7 @@ export class StackedBarChart extends BaseChart<StackedBarChartConfig> {
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
     );
+
+    this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
   }
 }

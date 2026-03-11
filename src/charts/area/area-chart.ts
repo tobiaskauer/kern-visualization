@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
-import { createLinearScale, createBandScale, createOrdinalColorScale } from '../../utils/scales';
-import { renderBottomAxis, renderLeftAxis } from '../../utils/axes';
+import { createLinearScale, createPointScale, createOrdinalColorScale } from '../../utils/scales';
+import { renderBottomAxis, renderLeftAxis, renderGridlinesY, renderGridlinesX } from '../../utils/axes';
+import { CHART_CONSTANTS } from '../../constants';
 import type { Datum } from '../bar/bar-chart';
 import type { LineSeries } from '../line/line-chart';
 
@@ -29,9 +30,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
     }
 
     const allLabels = series[0].data.map((d) => d.label);
-    const xScale = createBandScale(allLabels, [0, innerWidth], 0);
-    const xPoint = (label: string) =>
-      (xScale(label) ?? 0) + xScale.bandwidth() / 2;
+    const xScale = createPointScale(allLabels, [0, innerWidth]);
 
     const allValues = series.flatMap((s) => s.data.map((d) => d.value));
     const yScale = createLinearScale([0, d3.max(allValues) ?? 0], [innerHeight, 0]);
@@ -41,16 +40,24 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
       this.tokens.chartColors
     );
 
+    // Gridlines (before data layer)
+    if (this.config.gridlines?.y !== false) {
+      renderGridlinesY(g, yScale, innerWidth, this.tokens);
+    }
+    if (this.config.gridlines?.x !== false) {
+      renderGridlinesX(g, xScale, innerHeight, this.tokens);
+    }
+
     const areaGen = d3
       .area<Datum>()
-      .x((d) => xPoint(d.label))
+      .x((d) => xScale(d.label) ?? 0)
       .y0(innerHeight)
       .y1((d) => yScale(d.value))
       .curve(d3.curveMonotoneX);
 
     const lineGen = d3
       .line<Datum>()
-      .x((d) => xPoint(d.label))
+      .x((d) => xScale(d.label) ?? 0)
       .y((d) => yScale(d.value))
       .curve(d3.curveMonotoneX);
 
@@ -60,14 +67,14 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
       g.append('path')
         .datum(s.data)
         .attr('fill', color)
-        .attr('fill-opacity', 0.15)
+        .attr('fill-opacity', CHART_CONSTANTS.areaOpacity)
         .attr('d', areaGen);
 
       g.append('path')
         .datum(s.data)
         .attr('fill', 'none')
         .attr('stroke', color)
-        .attr('stroke-width', 2)
+        .attr('stroke-width', CHART_CONSTANTS.strokeWidth)
         .attr('d', lineGen);
     });
 
@@ -78,5 +85,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
     );
+
+    this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
   }
 }

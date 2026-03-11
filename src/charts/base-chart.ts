@@ -10,6 +10,9 @@ export interface BaseChartConfig {
   title?: string;
   description?: string;
   animated?: boolean;
+  gridlines?: { x?: boolean; y?: boolean };
+  xAxisLabel?: string;
+  yAxisLabel?: string;
 }
 
 export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -101,6 +104,36 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
       this.resizeObserver.disconnect();
     }
     d3.select(this.config.container).selectAll('svg').remove();
+  }
+
+  protected renderAxisLabels(
+    g: d3.Selection<SVGGElement, unknown, null, undefined>,
+    innerWidth: number,
+    innerHeight: number,
+    tokens: KernTokens
+  ): void {
+    const margin = this.config.margin ?? DEFAULT_MARGIN;
+    if (this.config.xAxisLabel) {
+      g.append('text')
+        .attr('x', innerWidth / 2)
+        .attr('y', innerHeight + margin.bottom - 4)
+        .attr('text-anchor', 'middle')
+        .attr('fill', tokens.colorTextMuted)
+        .attr('font-family', tokens.fontFamily)
+        .attr('font-size', tokens.fontSizeSmall || '12px')
+        .text(this.config.xAxisLabel);
+    }
+    if (this.config.yAxisLabel) {
+      g.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -innerHeight / 2)
+        .attr('y', -margin.left + 12)
+        .attr('text-anchor', 'middle')
+        .attr('fill', tokens.colorTextMuted)
+        .attr('font-family', tokens.fontFamily)
+        .attr('font-size', tokens.fontSizeSmall || '12px')
+        .text(this.config.yAxisLabel);
+    }
   }
 
   protected setupResizeObserver(): void {

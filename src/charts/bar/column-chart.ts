@@ -1,14 +1,13 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
 import { createBandScale, createLinearScale } from '../../utils/scales';
-import { renderBottomAxis, renderLeftAxis } from '../../utils/axes';
+import { renderBottomAxis, renderLeftAxis, renderGridlinesX } from '../../utils/axes';
+import { CHART_CONSTANTS } from '../../constants';
 import type { Datum } from './bar-chart';
 
 export interface ColumnChartConfig extends BaseChartConfig {
   data: Datum[];
   showValueLabels?: boolean;
-  xAxisLabel?: string;
-  yAxisLabel?: string;
 }
 
 export class ColumnChart extends BaseChart<ColumnChartConfig> {
@@ -39,6 +38,11 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
       [0, innerWidth]
     );
 
+    // Gridlines (before data layer)
+    if (this.config.gridlines?.x !== false) {
+      renderGridlinesX(g, xScale, innerHeight, this.tokens);
+    }
+
     // Bars
     const bars = g.selectAll<SVGRectElement, Datum>('rect').data(data);
 
@@ -48,14 +52,14 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
       .attr('y', (d) => yScale(d.label) ?? 0)
       .attr('height', yScale.bandwidth())
       .attr('fill', this.tokens.chartColors[0])
-      .attr('rx', 2);
+      .attr('rx', parseFloat(this.tokens.borderRadiusSmall));
 
     if (this.config.animated) {
       enterBars
         .attr('x', 0)
         .attr('width', 0)
         .transition()
-        .duration(400)
+        .duration(CHART_CONSTANTS.animationDuration)
         .attr('width', (d) => xScale(d.value));
     } else {
       enterBars.attr('x', 0).attr('width', (d) => xScale(d.value));
@@ -68,7 +72,7 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
         .enter()
         .append('text')
         .attr('class', 'value-label')
-        .attr('x', (d) => xScale(d.value) + 4)
+        .attr('x', (d) => xScale(d.value) + parseFloat(this.tokens.spaceXSmall))
         .attr('y', (d) => (yScale(d.label) ?? 0) + yScale.bandwidth() / 2)
         .attr('dy', '0.35em')
         .attr('fill', this.tokens.colorTextMuted)
@@ -85,5 +89,7 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
     );
+
+    this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
   }
 }

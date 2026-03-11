@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
 import { createLinearScale, createOrdinalColorScale } from '../../utils/scales';
-import { renderBottomAxis, renderLeftAxis } from '../../utils/axes';
+import { renderBottomAxis, renderLeftAxis, renderGridlinesY, renderGridlinesX } from '../../utils/axes';
+import { CHART_CONSTANTS } from '../../constants';
 
 export interface ScatterDatum {
   x: number;
@@ -12,8 +13,6 @@ export interface ScatterDatum {
 export interface ScatterChartConfig extends BaseChartConfig {
   data: ScatterDatum[];
   groups?: string[];
-  xAxisLabel?: string;
-  yAxisLabel?: string;
 }
 
 export class ScatterChart extends BaseChart<ScatterChartConfig> {
@@ -47,15 +46,23 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
     const allGroups = groups ?? [...new Set(data.map((d) => d.group ?? 'default'))];
     const colorScale = createOrdinalColorScale(allGroups, this.tokens.chartColors);
 
+    // Gridlines (before data layer)
+    if (this.config.gridlines?.y !== false) {
+      renderGridlinesY(g, yScale, innerWidth, this.tokens);
+    }
+    if (this.config.gridlines?.x !== false) {
+      renderGridlinesX(g, xScale, innerHeight, this.tokens);
+    }
+
     g.selectAll<SVGCircleElement, ScatterDatum>('circle')
       .data(data)
       .enter()
       .append('circle')
       .attr('cx', (d) => xScale(d.x))
       .attr('cy', (d) => yScale(d.y))
-      .attr('r', 5)
+      .attr('r', CHART_CONSTANTS.dotRadius)
       .attr('fill', (d) => colorScale(d.group ?? 'default'))
-      .attr('fill-opacity', 0.7);
+      .attr('fill-opacity', CHART_CONSTANTS.scatterOpacity);
 
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
@@ -65,27 +72,6 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
     );
 
-    if (this.config.xAxisLabel) {
-      g.append('text')
-        .attr('x', innerWidth / 2)
-        .attr('y', innerHeight + (this.config.margin?.bottom ?? 40) - 4)
-        .attr('text-anchor', 'middle')
-        .attr('fill', this.tokens.colorTextMuted)
-        .attr('font-family', this.tokens.fontFamily)
-        .attr('font-size', this.tokens.fontSizeSmall || '12px')
-        .text(this.config.xAxisLabel);
-    }
-
-    if (this.config.yAxisLabel) {
-      g.append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('x', -innerHeight / 2)
-        .attr('y', -(this.config.margin?.left ?? 50) + 12)
-        .attr('text-anchor', 'middle')
-        .attr('fill', this.tokens.colorTextMuted)
-        .attr('font-family', this.tokens.fontFamily)
-        .attr('font-size', this.tokens.fontSizeSmall || '12px')
-        .text(this.config.yAxisLabel);
-    }
+    this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
   }
 }

@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
-import { createLinearScale, createBandScale, createOrdinalColorScale } from '../../utils/scales';
-import { renderBottomAxis, renderLeftAxis } from '../../utils/axes';
+import { createLinearScale, createPointScale, createOrdinalColorScale } from '../../utils/scales';
+import { renderBottomAxis, renderLeftAxis, renderGridlinesY, renderGridlinesX } from '../../utils/axes';
+import { CHART_CONSTANTS } from '../../constants';
 import type { StackedDatum } from '../stacked-bar/stacked-bar-chart';
 
 export interface StackedAreaChartConfig extends BaseChartConfig {
@@ -34,14 +35,20 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
     const maxVal = d3.max(stackedData[stackedData.length - 1], (d) => d[1]) ?? 0;
 
     const allLabels = data.map((d) => d.label);
-    const xScale = createBandScale(allLabels, [0, innerWidth], 0);
-    const xPoint = (label: string) =>
-      (xScale(label) ?? 0) + xScale.bandwidth() / 2;
+    const xScale = createPointScale(allLabels, [0, innerWidth]);
     const yScale = createLinearScale([0, maxVal], [innerHeight, 0]);
+
+    // Gridlines (before data layer)
+    if (this.config.gridlines?.y !== false) {
+      renderGridlinesY(g, yScale, innerWidth, this.tokens);
+    }
+    if (this.config.gridlines?.x !== false) {
+      renderGridlinesX(g, xScale, innerHeight, this.tokens);
+    }
 
     const areaGen = d3
       .area<d3.SeriesPoint<StackedDatum>>()
-      .x((d) => xPoint((d.data as StackedDatum).label))
+      .x((d) => xScale((d.data as StackedDatum).label) ?? 0)
       .y0((d) => yScale(d[0]))
       .y1((d) => yScale(d[1]))
       .curve(d3.curveMonotoneX);
@@ -50,7 +57,7 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
       g.append('path')
         .datum(layer)
         .attr('fill', colorScale(layer.key))
-        .attr('fill-opacity', 0.8)
+        .attr('fill-opacity', CHART_CONSTANTS.stackedAreaOpacity)
         .attr('d', areaGen as any);
     });
 
@@ -61,5 +68,7 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
     );
+
+    this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
   }
 }
