@@ -42,6 +42,8 @@ function createChart(config: any): HTMLElement {
       xAxisLabel: config.xAxisLabel,
       yAxisLabel: config.yAxisLabel,
       gridlines: config.gridlines,
+      annotations: config.annotations,
+      legend: config.legend,
     });
     chart.render();
   });
@@ -64,3 +66,11 @@ export const WithAxisLabels: StoryObj = {
   name: 'With Axis Labels',
 };
 
+export const WithAnnotations: StoryObj = {
+  render: () => createChart({
+    annotations: [
+      { axis: 'y', value: 65, label: 'Zielwert' },
+    ],
+  }),
+  name: 'With Annotations',
+};

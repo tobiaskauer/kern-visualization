@@ -4,6 +4,8 @@ import { createLinearScale, createPointScale, createOrdinalColorScale } from '..
 import { renderBottomAxis, renderLeftAxis, renderGridlinesY, renderGridlinesX } from '../../utils/axes';
 import { CHART_CONSTANTS } from '../../constants';
 import type { StackedDatum } from '../stacked-bar/stacked-bar-chart';
+import { ChartTooltip } from '../../utils/tooltip';
+import { renderLegend } from '../../utils/legend';
 
 export interface StackedAreaChartConfig extends BaseChartConfig {
   data: StackedDatum[];
@@ -11,7 +13,12 @@ export interface StackedAreaChartConfig extends BaseChartConfig {
 }
 
 export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
+  private tooltip?: ChartTooltip;
+
   render(): void {
+    if (this.tooltip) {
+      this.tooltip.destroy();
+    }
     this.tokens = this.getTokens();
     const g = this.setupSvg();
     const { data, series } = this.config;
@@ -46,6 +53,9 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
       renderGridlinesX(g, xScale, innerHeight, this.tokens);
     }
 
+    // Annotations
+    this.renderAnnotations(g, yScale, xScale, innerWidth, innerHeight, this.tokens);
+
     const areaGen = d3
       .area<d3.SeriesPoint<StackedDatum>>()
       .x((d) => xScale((d.data as StackedDatum).label) ?? 0)
@@ -61,6 +71,53 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
         .attr('d', areaGen as any);
     });
 
+    // Tooltip
+    this.tooltip = new ChartTooltip(this.config.container);
+    const tooltip = this.tooltip;
+    const tokens = this.tokens;
+
+    // Mousemove overlay
+    const margin = this.config.margin ?? { top: 20, right: 20, bottom: 40, left: 50 };
+    const svgNode = this.svg.node();
+
+    g.append('rect')
+      .attr('class', 'tooltip-overlay')
+      .attr('width', innerWidth)
+      .attr('height', innerHeight)
+      .attr('fill', 'transparent')
+      .on('mousemove', (event: MouseEvent) => {
+        if (!svgNode) return;
+        const svgRect = svgNode.getBoundingClientRect();
+        const mouseX = event.clientX - svgRect.left - margin.left;
+
+        let nearestLabel = allLabels[0];
+        let minDist = Infinity;
+        for (const label of allLabels) {
+          const lx = xScale(label) ?? 0;
+          const dist = Math.abs(lx - mouseX);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestLabel = label;
+          }
+        }
+
+        const rowDatum = data.find((d) => d.label === nearestLabel);
+        const rows = series.map((s) => ({
+          label: s,
+          value: rowDatum ? String(rowDatum[s] ?? 0) : '—',
+          color: colorScale(s),
+        }));
+
+        const containerRect = this.config.container.getBoundingClientRect();
+        const px = event.clientX - containerRect.left;
+        const py = event.clientY - containerRect.top;
+
+        tooltip.show(nearestLabel, rows, px, py, tokens);
+      })
+      .on('mouseleave', () => {
+        tooltip.hide();
+      });
+
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens }));
@@ -70,5 +127,11 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
     );
 
     this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
+
+    // Legend
+    if (this.config.legend !== false) {
+      const legendItems = series.map((s) => ({ name: s, color: colorScale(s) }));
+      renderLegend(this.config.container, legendItems, this.tokens);
+    }
   }
 }

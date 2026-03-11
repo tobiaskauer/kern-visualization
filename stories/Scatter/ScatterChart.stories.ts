@@ -27,6 +27,8 @@ function createChart(config: any): HTMLElement {
       xAxisLabel: config.xAxisLabel ?? 'X-Achse',
       yAxisLabel: config.yAxisLabel ?? 'Y-Achse',
       gridlines: config.gridlines,
+      annotations: config.annotations,
+      legend: config.legend,
     });
     chart.render();
   });
@@ -37,4 +39,14 @@ function createChart(config: any): HTMLElement {
 export const Default: StoryObj = {
   render: () => createChart({}),
   name: 'Default',
+};
+
+export const WithAnnotations: StoryObj = {
+  render: () => createChart({
+    annotations: [
+      { axis: 'y', value: 50, label: 'Median Y' },
+      { axis: 'x', value: 50, label: 'Median X' },
+    ],
+  }),
+  name: 'With Annotations',
 };

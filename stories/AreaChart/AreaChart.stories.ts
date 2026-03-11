@@ -20,6 +20,17 @@ const sampleSeries = [
       { label: 'Jun', value: 85 },
     ],
   },
+  {
+    name: 'Ausgaben',
+    data: [
+      { label: 'Jan', value: 20 },
+      { label: 'Feb', value: 35 },
+      { label: 'Mär', value: 30 },
+      { label: 'Apr', value: 55 },
+      { label: 'Mai', value: 48 },
+      { label: 'Jun', value: 60 },
+    ],
+  },
 ];
 
 const stackedSeries = ['Desktop', 'Mobile', 'Tablet'];
@@ -44,6 +55,8 @@ function createChart(config: any): HTMLElement {
       animated: true,
       xAxisLabel: config.xAxisLabel,
       yAxisLabel: config.yAxisLabel,
+      annotations: config.annotations,
+      legend: config.legend,
     });
     chart.render();
   });
@@ -64,6 +77,8 @@ function createStackedChart(config: any): HTMLElement {
       title: 'Gerätenutzung über Zeit',
       xAxisLabel: config.xAxisLabel,
       yAxisLabel: config.yAxisLabel,
+      annotations: config.annotations,
+      legend: config.legend,
     });
     chart.render();
   });
@@ -76,9 +91,23 @@ export const Default: StoryObj = {
   name: 'Default',
 };
 
+export const SingleSeries: StoryObj = {
+  render: () => createChart({ series: [sampleSeries[0]] }),
+  name: 'Single Series',
+};
+
 export const WithAxisLabels: StoryObj = {
   render: () => createChart({ xAxisLabel: 'Monat', yAxisLabel: 'Einnahmen (€)' }),
   name: 'With Axis Labels',
+};
+
+export const WithAnnotations: StoryObj = {
+  render: () => createChart({
+    annotations: [
+      { axis: 'y', value: 60, label: 'Zielwert' },
+    ],
+  }),
+  name: 'With Annotations',
 };
 
 export const Stacked: StoryObj = {
@@ -89,4 +118,13 @@ export const Stacked: StoryObj = {
 export const StackedWithAxisLabels: StoryObj = {
   render: () => createStackedChart({ xAxisLabel: 'Monat', yAxisLabel: 'Sitzungen' }),
   name: 'Stacked – With Axis Labels',
+};
+
+export const StackedWithAnnotations: StoryObj = {
+  render: () => createStackedChart({
+    annotations: [
+      { axis: 'y', value: 80, label: 'Kapazität' },
+    ],
+  }),
+  name: 'Stacked – With Annotations',
 };

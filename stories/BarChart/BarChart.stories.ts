@@ -40,6 +40,7 @@ function createChart(config: any): HTMLElement {
       showValueLabels: config.showValueLabels ?? false,
       xAxisLabel: config.xAxisLabel,
       yAxisLabel: config.yAxisLabel,
+      annotations: config.annotations,
     });
     chart.render();
   });
@@ -61,6 +62,8 @@ function createStackedChart(config: any): HTMLElement {
       animated: true,
       xAxisLabel: config.xAxisLabel,
       yAxisLabel: config.yAxisLabel,
+      annotations: config.annotations,
+      legend: config.legend,
     });
     chart.render();
   });
@@ -83,6 +86,15 @@ export const WithAxisLabels: StoryObj = {
   name: 'With Axis Labels',
 };
 
+export const WithAnnotations: StoryObj = {
+  render: () => createChart({
+    annotations: [
+      { axis: 'y', value: 60, label: 'Zielwert' },
+    ],
+  }),
+  name: 'With Annotations',
+};
+
 export const EmptyState: StoryObj = {
   render: () => createChart({ data: [] }),
   name: 'Empty State',
@@ -96,6 +108,15 @@ export const Stacked: StoryObj = {
 export const StackedWithAxisLabels: StoryObj = {
   render: () => createStackedChart({ xAxisLabel: 'Monat', yAxisLabel: 'Besucher' }),
   name: 'Stacked – With Axis Labels',
+};
+
+export const StackedWithAnnotations: StoryObj = {
+  render: () => createStackedChart({
+    annotations: [
+      { axis: 'y', value: 50, label: 'Schwellenwert' },
+    ],
+  }),
+  name: 'Stacked – With Annotations',
 };
 
 export const StackedEmptyState: StoryObj = {

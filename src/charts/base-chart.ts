@@ -2,6 +2,12 @@ import * as d3 from 'd3';
 import { getTokens, type KernTokens } from '../tokens/kern-tokens';
 import { createResizeObserver } from '../utils/resize-observer';
 
+export interface Annotation {
+  axis: 'x' | 'y';
+  value: number | string; // number for y-axis, string (label) for x-axis
+  label?: string;
+}
+
 export interface BaseChartConfig {
   container: HTMLElement;
   width?: number;
@@ -13,6 +19,8 @@ export interface BaseChartConfig {
   gridlines?: { x?: boolean; y?: boolean };
   xAxisLabel?: string;
   yAxisLabel?: string;
+  annotations?: Annotation[];
+  legend?: boolean;
 }
 
 export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -133,6 +141,67 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
         .attr('font-family', tokens.fontFamily)
         .attr('font-size', tokens.fontSizeSmall || '12px')
         .text(this.config.yAxisLabel);
+    }
+  }
+
+  protected renderAnnotations(
+    g: d3.Selection<SVGGElement, unknown, null, undefined>,
+    yScale: d3.ScaleLinear<number, number> | null,
+    xScale: any | null,
+    innerWidth: number,
+    innerHeight: number,
+    tokens: KernTokens
+  ): void {
+    const annotations = this.config.annotations;
+    if (!annotations || annotations.length === 0) return;
+
+    const annotGroup = g.append('g').attr('class', 'annotations');
+
+    for (const ann of annotations) {
+      if (ann.axis === 'y' && yScale !== null) {
+        const yVal = typeof ann.value === 'number' ? ann.value : parseFloat(ann.value as string);
+        const yPos = yScale(yVal);
+        annotGroup.append('line')
+          .attr('x1', 0)
+          .attr('x2', innerWidth)
+          .attr('y1', yPos)
+          .attr('y2', yPos)
+          .attr('stroke', tokens.colorBorder)
+          .attr('stroke-width', 1)
+          .attr('stroke-dasharray', '6,3');
+
+        if (ann.label) {
+          annotGroup.append('text')
+            .attr('x', innerWidth + 4)
+            .attr('y', yPos)
+            .attr('dy', '0.35em')
+            .attr('fill', tokens.colorTextMuted)
+            .attr('font-family', tokens.fontFamily)
+            .attr('font-size', tokens.fontSizeSmall || '12px')
+            .text(ann.label);
+        }
+      } else if (ann.axis === 'x' && xScale !== null) {
+        const xPos = xScale(ann.value);
+        if (xPos == null) continue;
+        annotGroup.append('line')
+          .attr('x1', xPos)
+          .attr('x2', xPos)
+          .attr('y1', 0)
+          .attr('y2', innerHeight)
+          .attr('stroke', tokens.colorBorder)
+          .attr('stroke-width', 1)
+          .attr('stroke-dasharray', '6,3');
+
+        if (ann.label) {
+          annotGroup.append('text')
+            .attr('x', xPos + 4)
+            .attr('y', -4)
+            .attr('fill', tokens.colorTextMuted)
+            .attr('font-family', tokens.fontFamily)
+            .attr('font-size', tokens.fontSizeSmall || '12px')
+            .text(ann.label);
+        }
+      }
     }
   }
 
