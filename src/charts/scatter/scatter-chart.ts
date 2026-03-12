@@ -135,5 +135,6 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       const legendItems = allGroups.map((grp) => ({ name: grp, color: colorScale(grp) }));
       renderLegend(this.config.container, legendItems, this.tokens);
     }
+    this.renderCaption(this.tokens);
   }
 }

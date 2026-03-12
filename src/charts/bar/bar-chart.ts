@@ -153,5 +153,6 @@ export class BarChart extends BaseChart<BarChartConfig> {
     );
 
     this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
+    this.renderCaption(this.tokens);
   }
 }

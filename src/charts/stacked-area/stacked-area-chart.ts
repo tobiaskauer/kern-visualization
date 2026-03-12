@@ -61,7 +61,7 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
       .x((d) => xScale((d.data as StackedDatum).label) ?? 0)
       .y0((d) => yScale(d[0]))
       .y1((d) => yScale(d[1]))
-      .curve(d3.curveMonotoneX);
+      .curve(d3.curveLinear);
 
     stackedData.forEach((layer) => {
       g.append('path')
@@ -133,5 +133,6 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
       const legendItems = series.map((s) => ({ name: s, color: colorScale(s) }));
       renderLegend(this.config.container, legendItems, this.tokens);
     }
+    this.renderCaption(this.tokens);
   }
 }

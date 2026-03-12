@@ -21,6 +21,7 @@ export interface BaseChartConfig {
   yAxisLabel?: string;
   annotations?: Annotation[];
   legend?: boolean;
+  caption?: string;
 }
 
 export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -66,8 +67,10 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
   }
 
   protected setupSvg(): d3.Selection<SVGGElement, unknown, null, undefined> {
-    // Remove existing SVG
+    // Remove existing SVG, legend, caption
     d3.select(this.config.container).selectAll('svg').remove();
+    this.config.container.querySelector('.kern-chart-legend')?.remove();
+    this.config.container.querySelector('.kern-chart-caption')?.remove();
 
     const margin = this.config.margin ?? DEFAULT_MARGIN;
     const width = this.getTotalWidth();
@@ -167,14 +170,14 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
           .attr('y1', yPos)
           .attr('y2', yPos)
           .attr('stroke', tokens.colorBorder)
-          .attr('stroke-width', 1)
+          .attr('stroke-width', 2)
           .attr('stroke-dasharray', '6,3');
 
         if (ann.label) {
           annotGroup.append('text')
-            .attr('x', innerWidth + 4)
-            .attr('y', yPos)
-            .attr('dy', '0.35em')
+            .attr('x', innerWidth - 4)
+            .attr('y', yPos - 4)
+            .attr('text-anchor', 'end')
             .attr('fill', tokens.colorTextMuted)
             .attr('font-family', tokens.fontFamily)
             .attr('font-size', tokens.fontSizeSmall || '12px')
@@ -189,13 +192,13 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
           .attr('y1', 0)
           .attr('y2', innerHeight)
           .attr('stroke', tokens.colorBorder)
-          .attr('stroke-width', 1)
+          .attr('stroke-width', 2)
           .attr('stroke-dasharray', '6,3');
 
         if (ann.label) {
           annotGroup.append('text')
             .attr('x', xPos + 4)
-            .attr('y', -4)
+            .attr('y', 10)
             .attr('fill', tokens.colorTextMuted)
             .attr('font-family', tokens.fontFamily)
             .attr('font-size', tokens.fontSizeSmall || '12px')
@@ -203,6 +206,22 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
         }
       }
     }
+  }
+
+  protected renderCaption(tokens: KernTokens): void {
+    if (!this.config.caption) return;
+    const el = document.createElement('p');
+    el.className = 'kern-chart-caption';
+    el.textContent = this.config.caption;
+    el.style.cssText = `
+      margin: 4px 0 0 0;
+      padding: 0;
+      font-family: ${tokens.fontFamily};
+      font-size: ${tokens.fontSizeSmall || '12px'};
+      color: ${tokens.colorTextMuted};
+      text-align: center;
+    `;
+    this.config.container.appendChild(el);
   }
 
   protected setupResizeObserver(): void {

@@ -141,5 +141,6 @@ export class StackedBarChart extends BaseChart<StackedBarChartConfig> {
       const legendItems = series.map((s) => ({ name: s, color: colorScale(s) }));
       renderLegend(this.config.container, legendItems, this.tokens);
     }
+    this.renderCaption(this.tokens);
   }
 }

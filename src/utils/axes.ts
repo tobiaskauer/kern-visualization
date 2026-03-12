@@ -46,8 +46,7 @@ export function renderGridlinesY(
   gridGroup
     .selectAll('.tick line')
     .attr('stroke', tokens.colorBorder)
-    .attr('stroke-opacity', 0.5)
-    .attr('stroke-dasharray', '4,4');
+    .attr('stroke-opacity', 0.5);
   gridGroup.selectAll('.tick text').remove();
 }
 
@@ -67,8 +66,7 @@ export function renderGridlinesX(
   gridGroup
     .selectAll('.tick line')
     .attr('stroke', tokens.colorBorder)
-    .attr('stroke-opacity', 0.5)
-    .attr('stroke-dasharray', '4,4');
+    .attr('stroke-opacity', 0.5);
   gridGroup.selectAll('.tick text').remove();
 }
 

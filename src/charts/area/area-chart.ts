@@ -63,13 +63,13 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
       .x((d) => xScale(d.label) ?? 0)
       .y0(innerHeight)
       .y1((d) => yScale(d.value))
-      .curve(d3.curveMonotoneX);
+      .curve(d3.curveLinear);
 
     const lineGen = d3
       .line<Datum>()
       .x((d) => xScale(d.label) ?? 0)
       .y((d) => yScale(d.value))
-      .curve(d3.curveMonotoneX);
+      .curve(d3.curveLinear);
 
     series.forEach((s) => {
       const color = colorScale(s.name);
@@ -93,6 +93,28 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
     const tooltip = this.tooltip;
     const tokens = this.tokens;
 
+    // Crosshair group (vertical line + per-series dots), hidden until hover
+    const crosshair = g.append('g').attr('class', 'crosshair').style('display', 'none');
+
+    crosshair.append('line')
+      .attr('class', 'crosshair-line')
+      .attr('y1', 0)
+      .attr('y2', innerHeight)
+      .attr('stroke', tokens.colorBorder)
+      .attr('stroke-width', 1)
+      .attr('pointer-events', 'none');
+
+    series.forEach((s) => {
+      crosshair.append('circle')
+        .attr('class', 'crosshair-dot')
+        .attr('data-series', s.name)
+        .attr('r', 4)
+        .attr('fill', colorScale(s.name))
+        .attr('stroke', 'white')
+        .attr('stroke-width', 2)
+        .attr('pointer-events', 'none');
+    });
+
     // Focus handles per data point per series
     series.forEach((s) => {
       const color = colorScale(s.name);
@@ -111,19 +133,21 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
           .style('cursor', 'pointer')
           .style('outline', 'none')
           .on('focus', (event: FocusEvent, fd: Datum) => {
-            g.append('circle')
-              .attr('class', 'focus-dot')
-              .attr('cx', cx)
-              .attr('cy', cy)
-              .attr('r', 4)
-              .attr('fill', color)
-              .attr('pointer-events', 'none');
-
             const containerRect = this.config.container.getBoundingClientRect();
             const target = event.target as HTMLElement;
             const rect = target.getBoundingClientRect();
             const px = rect.left - containerRect.left + rect.width / 2;
             const py = rect.top - containerRect.top;
+
+            crosshair.style('display', null);
+            crosshair.select('.crosshair-line').attr('x1', cx).attr('x2', cx);
+            crosshair.selectAll<SVGCircleElement, unknown>('.crosshair-dot')
+              .each(function() {
+                const el = d3.select(this);
+                if (el.attr('data-series') === s.name) {
+                  el.attr('cx', cx).attr('cy', cy);
+                }
+              });
 
             tooltip.show(
               fd.label,
@@ -134,7 +158,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
             );
           })
           .on('blur', () => {
-            g.selectAll('.focus-dot').remove();
+            crosshair.style('display', 'none');
             tooltip.hide();
           });
       });
@@ -165,6 +189,21 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
           }
         }
 
+        const nearestX = xScale(nearestLabel) ?? 0;
+
+        // Update crosshair
+        crosshair.style('display', null);
+        crosshair.select('.crosshair-line').attr('x1', nearestX).attr('x2', nearestX);
+        crosshair.selectAll<SVGCircleElement, unknown>('.crosshair-dot').each(function() {
+          const el = d3.select(this);
+          const seriesName = el.attr('data-series');
+          const s = series.find((s) => s.name === seriesName);
+          const point = s?.data.find((dp) => dp.label === nearestLabel);
+          if (point) {
+            el.attr('cx', nearestX).attr('cy', yScale(point.value));
+          }
+        });
+
         const rows = series.map((s) => {
           const point = s.data.find((dp) => dp.label === nearestLabel);
           return {
@@ -181,6 +220,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
         tooltip.show(nearestLabel, rows, px, py, tokens);
       })
       .on('mouseleave', () => {
+        crosshair.style('display', 'none');
         tooltip.hide();
       });
 
@@ -199,5 +239,6 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
       const legendItems = series.map((s) => ({ name: s.name, color: colorScale(s.name) }));
       renderLegend(this.config.container, legendItems, this.tokens);
     }
+    this.renderCaption(this.tokens);
   }
 }

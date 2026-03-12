@@ -4,6 +4,24 @@ import { StackedBarChart } from '../../src/charts/stacked-bar/stacked-bar-chart'
 
 const meta: Meta = {
   title: 'Charts/BarChart',
+  argTypes: {
+    xAxisLabel:      { control: 'text',    name: 'X Axis Label' },
+    yAxisLabel:      { control: 'text',    name: 'Y Axis Label' },
+    caption:         { control: 'text',    name: 'Caption' },
+    animated:        { control: 'boolean', name: 'Animated' },
+    showValueLabels: { control: 'boolean', name: 'Show Value Labels' },
+    gridlinesY:      { control: 'boolean', name: 'Gridlines' },
+    legend:          { control: 'boolean', name: 'Legend' },
+  },
+  args: {
+    xAxisLabel:      '',
+    yAxisLabel:      '',
+    caption:         '',
+    animated:        true,
+    showValueLabels: false,
+    gridlinesY:      true,
+    legend:          true,
+  },
 };
 
 export default meta;
@@ -26,100 +44,99 @@ const stackedData = [
   { label: 'Mai', Direkt: 22, Organisch: 18, Referral: 9 },
 ];
 
-function createChart(config: any): HTMLElement {
+function createChart(args: any): HTMLElement {
   const container = document.createElement('div');
   container.style.width = '600px';
   container.style.height = '300px';
 
   requestAnimationFrame(() => {
-    const chart = new BarChart({
+    new BarChart({
       container,
-      data: config.data ?? sampleData,
-      title: config.title ?? 'Monatliche Werte',
-      animated: config.animated ?? true,
-      showValueLabels: config.showValueLabels ?? false,
-      xAxisLabel: config.xAxisLabel,
-      yAxisLabel: config.yAxisLabel,
-      annotations: config.annotations,
-    });
-    chart.render();
+      data: args.data ?? sampleData,
+      title: 'Monatliche Werte',
+      animated: args.animated,
+      showValueLabels: args.showValueLabels,
+      xAxisLabel: args.xAxisLabel || undefined,
+      yAxisLabel: args.yAxisLabel || undefined,
+      caption: args.caption || undefined,
+      gridlines: { y: args.gridlinesY },
+      annotations: args.annotations,
+    }).render();
   });
 
   return container;
 }
 
-function createStackedChart(config: any): HTMLElement {
+function createStackedChart(args: any): HTMLElement {
   const container = document.createElement('div');
   container.style.width = '600px';
   container.style.height = '300px';
 
   requestAnimationFrame(() => {
-    const chart = new StackedBarChart({
+    new StackedBarChart({
       container,
-      data: config.data ?? stackedData,
-      series: config.series ?? stackedSeries,
+      data: args.data ?? stackedData,
+      series: stackedSeries,
       title: 'Traffic-Quellen',
-      animated: true,
-      xAxisLabel: config.xAxisLabel,
-      yAxisLabel: config.yAxisLabel,
-      annotations: config.annotations,
-      legend: config.legend,
-    });
-    chart.render();
+      animated: args.animated,
+      xAxisLabel: args.xAxisLabel || undefined,
+      yAxisLabel: args.yAxisLabel || undefined,
+      caption: args.caption || undefined,
+      gridlines: { y: args.gridlinesY },
+      legend: args.legend,
+      annotations: args.annotations,
+    }).render();
   });
 
   return container;
 }
 
 export const Default: StoryObj = {
-  render: () => createChart({}),
+  render: (args) => createChart(args),
   name: 'Default',
 };
 
 export const WithValueLabels: StoryObj = {
-  render: () => createChart({ showValueLabels: true }),
+  render: (args) => createChart(args),
   name: 'With Value Labels',
+  args: { showValueLabels: true },
 };
 
 export const WithAxisLabels: StoryObj = {
-  render: () => createChart({ xAxisLabel: 'Monat', yAxisLabel: 'Wert' }),
+  render: (args) => createChart(args),
   name: 'With Axis Labels',
+  args: { xAxisLabel: 'Monat', yAxisLabel: 'Wert' },
 };
 
 export const WithAnnotations: StoryObj = {
-  render: () => createChart({
-    annotations: [
-      { axis: 'y', value: 60, label: 'Zielwert' },
-    ],
-  }),
+  render: (args) => createChart(args),
   name: 'With Annotations',
+  args: { annotations: [{ axis: 'y', value: 60, label: 'Zielwert' }] },
 };
 
 export const EmptyState: StoryObj = {
-  render: () => createChart({ data: [] }),
+  render: (args) => createChart({ ...args, data: [] }),
   name: 'Empty State',
 };
 
 export const Stacked: StoryObj = {
-  render: () => createStackedChart({}),
+  render: (args) => createStackedChart(args),
   name: 'Stacked',
 };
 
 export const StackedWithAxisLabels: StoryObj = {
-  render: () => createStackedChart({ xAxisLabel: 'Monat', yAxisLabel: 'Besucher' }),
+  render: (args) => createStackedChart(args),
   name: 'Stacked – With Axis Labels',
+  args: { xAxisLabel: 'Monat', yAxisLabel: 'Besucher' },
 };
 
 export const StackedWithAnnotations: StoryObj = {
-  render: () => createStackedChart({
-    annotations: [
-      { axis: 'y', value: 50, label: 'Schwellenwert' },
-    ],
-  }),
+  render: (args) => createStackedChart(args),
   name: 'Stacked – With Annotations',
+  args: { annotations: [{ axis: 'y', value: 50, label: 'Schwellenwert' }] },
 };
 
 export const StackedEmptyState: StoryObj = {
-  render: () => createStackedChart({ data: [] }),
+  render: (args) => createStackedChart({ ...args, data: [] }),
   name: 'Stacked – Empty State',
 };

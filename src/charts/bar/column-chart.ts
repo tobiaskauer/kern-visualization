@@ -143,5 +143,6 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
     );
 
     this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
+    this.renderCaption(this.tokens);
   }
 }
