@@ -27,3 +27,6 @@ export type { StackedAreaChartConfig } from './charts/stacked-area/stacked-area-
 
 export { ScatterChart } from './charts/scatter/scatter-chart';
 export type { ScatterChartConfig, ScatterDatum } from './charts/scatter/scatter-chart';
+
+export { SmallMultiples } from './components/small-multiples';
+export type { SmallMultiplesConfig, SmallMultiplesChartType } from './components/small-multiples';

@@ -1,120 +1,94 @@
 import type { Meta, StoryObj } from '@storybook/html';
 import { ColumnChart } from '../../src/charts/bar/column-chart';
-import { StackedColumnChart } from '../../src/charts/stacked-bar/stacked-column-chart';
 
 const meta: Meta = {
   title: 'Charts/ColumnChart',
+  argTypes: {
+    xAxisLabel:      { control: 'text',                                               name: 'X Axis Label' },
+    yAxisLabel:      { control: 'text',                                               name: 'Y Axis Label' },
+    caption:         { control: 'text',                                               name: 'Caption' },
+    animated:        { control: 'boolean',                                            name: 'Animated' },
+    showValueLabels: { control: 'boolean',                                            name: 'Show Value Labels' },
+    gridlinesX:      { control: 'boolean',                                            name: 'Gridlines' },
+    sort:            { control: { type: 'select' }, options: ['none', 'asc', 'desc'], name: 'Sort' },
+  },
+  args: {
+    xAxisLabel:      'Einwohner',
+    yAxisLabel:      'Stadt',
+    caption:         '',
+    animated:        true,
+    showValueLabels: false,
+    gridlinesX:      true,
+    sort:            'none',
+  },
 };
 
 export default meta;
 
 const sampleData = [
-  { label: 'Berlin', value: 3645000 },
-  { label: 'Hamburg', value: 1841000 },
-  { label: 'München', value: 1488000 },
-  { label: 'Köln', value: 1084000 },
-  { label: 'Frankfurt', value: 759000 },
+  { label: 'Berlin',    value: 3645000 },
+  { label: 'Hamburg',   value: 1841000 },
+  { label: 'München',   value: 1488000 },
+  { label: 'Köln',      value: 1084000 },
+  { label: 'Frankfurt', value:  759000 },
 ];
 
-const stackedSeries = ['Direkt', 'Organisch', 'Referral'];
-const stackedData = [
-  { label: 'Jan', Direkt: 20, Organisch: 15, Referral: 7 },
-  { label: 'Feb', Direkt: 25, Organisch: 20, Referral: 10 },
-  { label: 'Mär', Direkt: 18, Organisch: 12, Referral: 5 },
-  { label: 'Apr', Direkt: 30, Organisch: 25, Referral: 12 },
-];
-
-function createChart(config: any): HTMLElement {
+function createChart(args: any): HTMLElement {
   const container = document.createElement('div');
   container.style.width = '600px';
   container.style.height = '300px';
 
   requestAnimationFrame(() => {
-    const chart = new ColumnChart({
+    new ColumnChart({
       container,
-      data: config.data ?? sampleData,
-      title: config.title ?? 'Bevölkerung nach Stadt',
-      animated: config.animated ?? true,
-      showValueLabels: config.showValueLabels ?? false,
+      data: args.data ?? sampleData,
+      title: 'Bevölkerung nach Stadt',
+      animated: args.animated,
+      showValueLabels: args.showValueLabels,
       margin: { top: 20, right: 60, bottom: 40, left: 100 },
-      xAxisLabel: config.xAxisLabel,
-      yAxisLabel: config.yAxisLabel,
-      annotations: config.annotations,
-    });
-    chart.render();
-  });
-
-  return container;
-}
-
-function createStackedChart(config: any): HTMLElement {
-  const container = document.createElement('div');
-  container.style.width = '600px';
-  container.style.height = '300px';
-
-  requestAnimationFrame(() => {
-    const chart = new StackedColumnChart({
-      container,
-      data: config.data ?? stackedData,
-      series: config.series ?? stackedSeries,
-      title: 'Stacked Column',
-      animated: true,
-      margin: { top: 20, right: 20, bottom: 40, left: 80 },
-      xAxisLabel: config.xAxisLabel,
-      yAxisLabel: config.yAxisLabel,
-      annotations: config.annotations,
-      legend: config.legend,
-    });
-    chart.render();
+      xAxisLabel: args.xAxisLabel || undefined,
+      yAxisLabel: args.yAxisLabel || undefined,
+      caption: args.caption || undefined,
+      gridlines: { x: args.gridlinesX },
+      sort: args.sort,
+      annotations: args.annotations,
+    }).render();
   });
 
   return container;
 }
 
 export const Default: StoryObj = {
-  render: () => createChart({}),
+  render: (args) => createChart(args),
   name: 'Default',
 };
 
 export const WithValueLabels: StoryObj = {
-  render: () => createChart({ showValueLabels: true }),
+  render: (args) => createChart(args),
   name: 'With Value Labels',
-};
-
-export const WithAxisLabels: StoryObj = {
-  render: () => createChart({ xAxisLabel: 'Einwohner', yAxisLabel: 'Stadt' }),
-  name: 'With Axis Labels',
+  args: { showValueLabels: true },
 };
 
 export const WithAnnotations: StoryObj = {
-  render: () => createChart({
-    annotations: [
-      { axis: 'x', value: 2000000, label: '2M' },
-    ],
-  }),
+  render: (args) => createChart(args),
   name: 'With Annotations',
+  args: { annotations: [{ axis: 'x', value: 2000000, label: '2M' }] },
 };
 
 export const EmptyState: StoryObj = {
-  render: () => createChart({ data: [] }),
+  render: (args) => createChart({ ...args, data: [] }),
   name: 'Empty State',
 };
 
-export const Stacked: StoryObj = {
-  render: () => createStackedChart({}),
-  name: 'Stacked',
-};
+const longLabelData = [
+  { label: 'Nordrhein-Westfalen', value: 17900000 },
+  { label: 'Bayern', value: 13100000 },
+  { label: 'Baden-Württemberg', value: 11100000 },
+  { label: 'Niedersachsen', value: 7990000 },
+  { label: 'Hessen', value: 6290000 },
+];
 
-export const StackedWithAxisLabels: StoryObj = {
-  render: () => createStackedChart({ xAxisLabel: 'Besucher', yAxisLabel: 'Monat' }),
-  name: 'Stacked – With Axis Labels',
-};
-
-export const StackedWithAnnotations: StoryObj = {
-  render: () => createStackedChart({
-    annotations: [
-      { axis: 'x', value: 40, label: 'Ziel' },
-    ],
-  }),
-  name: 'Stacked – With Annotations',
+export const LongLabels: StoryObj = {
+  render: (args) => createChart({ ...args, data: longLabelData }),
+  name: 'Long Labels (Don\'t)',
 };

@@ -5,6 +5,7 @@ export interface AxisOptions {
   tokens: KernTokens;
   tickCount?: number;
   tickFormat?: (d: d3.NumberValue) => string;
+  innerWidth?: number;
 }
 
 export function renderBottomAxis(
@@ -15,6 +16,16 @@ export function renderBottomAxis(
   const axis = d3.axisBottom(scale);
   if (options.tickCount) axis.ticks(options.tickCount);
   if (options.tickFormat) axis.tickFormat(options.tickFormat as (d: d3.NumberValue) => string);
+
+  if (options.innerWidth != null && typeof (scale as any).bandwidth === 'function') {
+    const domain = (scale as any).domain() as string[];
+    const approxLabelWidth = 48;
+    const maxLabels = Math.max(1, Math.floor(options.innerWidth / approxLabelWidth));
+    if (domain.length > maxLabels) {
+      const step = Math.ceil(domain.length / maxLabels);
+      axis.tickValues(domain.filter((_, i) => i % step === 0));
+    }
+  }
 
   g.call(axis);
   styleAxis(g, options.tokens);

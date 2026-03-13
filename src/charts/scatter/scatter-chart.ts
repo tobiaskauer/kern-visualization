@@ -1,32 +1,33 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
-import { createLinearScale, createOrdinalColorScale } from '../../utils/scales';
+import { createLinearScale } from '../../utils/scales';
 import { renderBottomAxis, renderLeftAxis, renderGridlinesY, renderGridlinesX } from '../../utils/axes';
 import { CHART_CONSTANTS } from '../../constants';
 import { ChartTooltip } from '../../utils/tooltip';
-import { renderLegend } from '../../utils/legend';
+import { renderDivergingLegend } from '../../utils/legend';
 
 export interface ScatterDatum {
   x: number;
   y: number;
-  group?: string;
+  z?: number;   // third dimension mapped to color via diverging scale
 }
 
 export interface ScatterChartConfig extends BaseChartConfig {
   data: ScatterDatum[];
-  groups?: string[];
+  zLabel?: string;  // label shown above the diverging legend
 }
 
 export class ScatterChart extends BaseChart<ScatterChartConfig> {
   private tooltip?: ChartTooltip;
 
   render(): void {
+    if (this.isTooSmall()) return;
     if (this.tooltip) {
       this.tooltip.destroy();
     }
     this.tokens = this.getTokens();
     const g = this.setupSvg();
-    const { data, groups } = this.config;
+    const { data } = this.config;
     const innerWidth = this.getInnerWidth();
     const innerHeight = this.getInnerHeight();
 
@@ -50,8 +51,24 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       [innerHeight, 0]
     );
 
-    const allGroups = groups ?? [...new Set(data.map((d) => d.group ?? 'default'))];
-    const colorScale = createOrdinalColorScale(allGroups, this.tokens.chartColors);
+    // Build z-based diverging color scale (symmetric around 0)
+    const hasZ = data.some((d) => d.z != null);
+    let colorFn: (d: ScatterDatum) => string;
+    let zColorScale: d3.ScaleQuantize<string, never> | null = null;
+    let zDomain: [number, number] = [0, 0];
+
+    if (hasZ) {
+      const zVals = data.filter((d) => d.z != null).map((d) => d.z as number);
+      const absMax = Math.max(Math.abs(d3.min(zVals) ?? 0), Math.abs(d3.max(zVals) ?? 0));
+      zDomain = [-absMax, absMax];
+      zColorScale = d3
+        .scaleQuantize<string>()
+        .domain(zDomain)
+        .range(this.tokens.divergingColors as string[]);
+      colorFn = (d) => zColorScale!(d.z ?? 0);
+    } else {
+      colorFn = () => this.tokens.chartColors[0];
+    }
 
     // Gridlines (before data layer)
     if (this.config.gridlines?.y !== false) {
@@ -76,18 +93,19 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       .attr('cx', (d) => xScale(d.x))
       .attr('cy', (d) => yScale(d.y))
       .attr('r', CHART_CONSTANTS.dotRadius)
-      .attr('fill', (d) => colorScale(d.group ?? 'default'))
+      .attr('fill', (d) => colorFn(d))
       .attr('fill-opacity', CHART_CONSTANTS.scatterOpacity)
-      .attr('tabindex', '0')
-      .attr('aria-label', (d) => `${d.group ?? 'default'}: (${d.x}, ${d.y})`)
+      .attr('tabindex', '-1')
+      .attr('aria-label', (d) => {
+        const zPart = d.z != null ? `, z: ${d.z}` : '';
+        return `(${d.x.toFixed(1)}, ${d.y.toFixed(1)}${zPart})`;
+      })
       .style('cursor', 'pointer')
       .style('outline', 'none');
 
     circles
       .on('mouseover focus', function (this: SVGCircleElement, event: MouseEvent | FocusEvent, d) {
-        // Highlight this dot, dim others
-        circles
-          .attr('fill-opacity', (other) => (other === d ? 1.0 : 0.3));
+        circles.attr('fill-opacity', (other) => (other === d ? 1.0 : 0.3));
 
         const containerRect = (this.ownerSVGElement?.parentElement as HTMLElement)?.getBoundingClientRect();
         let px = 0;
@@ -103,17 +121,15 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
           }
         }
 
-        const groupName = d.group ?? 'default';
-        tooltip.show(
-          groupName,
-          [
-            { label: 'x', value: String(d.x) },
-            { label: 'y', value: String(d.y) },
-          ],
-          px,
-          py,
-          tokens
-        );
+        const rows: { label: string; value: string; color?: string }[] = [
+          { label: 'x', value: d.x.toFixed(1) },
+          { label: 'y', value: d.y.toFixed(1) },
+        ];
+        if (d.z != null) {
+          rows.push({ label: 'z', value: d.z.toFixed(1), color: colorFn(d) });
+        }
+
+        tooltip.show(`(${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, rows, px, py, tokens);
       })
       .on('mouseout blur', function () {
         circles.attr('fill-opacity', CHART_CONSTANTS.scatterOpacity);
@@ -122,7 +138,7 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
 
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens }));
+      .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens, innerWidth }));
 
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
@@ -130,11 +146,69 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
 
     this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
 
-    // Legend (show if groups are present)
-    if (this.config.legend !== false && allGroups.length > 1) {
-      const legendItems = allGroups.map((grp) => ({ name: grp, color: colorScale(grp) }));
-      renderLegend(this.config.container, legendItems, this.tokens);
+    // Legend: diverging scale strip when z is present, nothing otherwise
+    if (hasZ && zColorScale && this.config.legend !== false) {
+      renderDivergingLegend(
+        this.config.container,
+        zDomain,
+        this.tokens.divergingColors,
+        this.tokens,
+        this.config.zLabel
+      );
     }
     this.renderCaption(this.tokens);
+
+    // SVG-level keyboard navigation (sorted by x value)
+    const kbMargin = this.config.margin ?? { top: 20, right: 20, bottom: 40, left: 50 };
+    const sortedData = [...data].sort((a, b) => a.x - b.x);
+
+    this.svg
+      .attr('tabindex', '0')
+      .attr('role', 'application')
+      .attr('aria-label', this.config.title ?? 'Chart');
+
+    let kbIdx = -1;
+
+    this.svg.on('keydown.kb', (event: KeyboardEvent) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Escape') { (this.svg.node() as SVGElement).blur(); return; }
+      kbIdx = event.key === 'ArrowRight'
+        ? Math.min(kbIdx + 1, sortedData.length - 1)
+        : Math.max(kbIdx - 1, 0);
+      if (kbIdx < 0) kbIdx = 0;
+      const d = sortedData[kbIdx];
+      circles.attr('fill-opacity', (other) => (other === d ? 1.0 : 0.3));
+      const svgRect = this.svg.node()!.getBoundingClientRect();
+      const containerRect = this.config.container.getBoundingClientRect();
+      const px = svgRect.left - containerRect.left + xScale(d.x) + kbMargin.left;
+      const py = svgRect.top - containerRect.top + yScale(d.y) + kbMargin.top;
+      const rows: { label: string; value: string; color?: string }[] = [
+        { label: 'x', value: d.x.toFixed(1) },
+        { label: 'y', value: d.y.toFixed(1) },
+      ];
+      if (d.z != null) rows.push({ label: 'z', value: d.z.toFixed(1), color: colorFn(d) });
+      tooltip.show(`(${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, rows, px, py, tokens);
+    })
+    .on('focus.kb', () => {
+      kbIdx = 0;
+      const d = sortedData[0];
+      circles.attr('fill-opacity', (other) => (other === d ? 1.0 : 0.3));
+      const svgRect = this.svg.node()!.getBoundingClientRect();
+      const containerRect = this.config.container.getBoundingClientRect();
+      const px = svgRect.left - containerRect.left + xScale(d.x) + kbMargin.left;
+      const py = svgRect.top - containerRect.top + yScale(d.y) + kbMargin.top;
+      const rows: { label: string; value: string; color?: string }[] = [
+        { label: 'x', value: d.x.toFixed(1) },
+        { label: 'y', value: d.y.toFixed(1) },
+      ];
+      if (d.z != null) rows.push({ label: 'z', value: d.z.toFixed(1), color: colorFn(d) });
+      tooltip.show(`(${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, rows, px, py, tokens);
+    })
+    .on('blur.kb', () => {
+      kbIdx = -1;
+      circles.attr('fill-opacity', CHART_CONSTANTS.scatterOpacity);
+      tooltip.hide();
+    });
   }
 }

@@ -9,20 +9,28 @@ import { ChartTooltip } from '../../utils/tooltip';
 export interface ColumnChartConfig extends BaseChartConfig {
   data: Datum[];
   showValueLabels?: boolean;
+  sort?: 'asc' | 'desc' | 'none';
 }
 
 export class ColumnChart extends BaseChart<ColumnChartConfig> {
   private tooltip?: ChartTooltip;
 
   render(): void {
+    if (this.isTooSmall()) return;
     if (this.tooltip) {
       this.tooltip.destroy();
     }
     this.tokens = this.getTokens();
     const g = this.setupSvg();
-    const { data } = this.config;
+    const rawData = this.config.data;
     const innerWidth = this.getInnerWidth();
     const innerHeight = this.getInnerHeight();
+
+    const data = this.config.sort === 'asc'
+      ? [...rawData].sort((a, b) => a.value - b.value)
+      : this.config.sort === 'desc'
+      ? [...rawData].sort((a, b) => b.value - a.value)
+      : rawData;
 
     if (!data || data.length === 0) {
       g.append('text')
@@ -49,13 +57,11 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
       renderGridlinesX(g, xScale, innerHeight, this.tokens);
     }
 
-    // Annotations (x-axis annotations for column chart — note axes are swapped)
-    this.renderAnnotations(g, null, xScale, innerWidth, innerHeight, this.tokens);
-
     // Tooltip
     this.tooltip = new ChartTooltip(this.config.container);
     const tooltip = this.tooltip;
     const tokens = this.tokens;
+    const barColor = this.tokens.chartColors[0];
 
     // Bars
     const bars = g.selectAll<SVGRectElement, Datum>('rect').data(data);
@@ -65,9 +71,9 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
       .append('rect')
       .attr('y', (d) => yScale(d.label) ?? 0)
       .attr('height', yScale.bandwidth())
-      .attr('fill', this.tokens.chartColors[0])
+      .attr('fill', barColor)
       .attr('rx', parseFloat(this.tokens.borderRadiusSmall))
-      .attr('tabindex', '0')
+      .attr('tabindex', '-1')
       .attr('aria-label', (d) => `${d.label}: ${d.value}`)
       .style('cursor', 'pointer')
       .style('outline', 'none');
@@ -106,7 +112,7 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
 
         tooltip.show(
           d.label,
-          [{ label: 'Wert', value: d.value.toString(), color: tokens.chartColors[0] }],
+          [{ label: 'Wert', value: d.value.toString(), color: barColor }],
           px,
           py,
           tokens
@@ -116,6 +122,47 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
         allBars.style('opacity', 1);
         tooltip.hide();
       });
+
+    // SVG-level keyboard navigation (ArrowUp/Down for column chart)
+    const margin = this.config.margin ?? { top: 20, right: 20, bottom: 40, left: 50 };
+    this.svg
+      .attr('tabindex', '0')
+      .attr('role', 'application')
+      .attr('aria-label', this.config.title ?? 'Chart');
+
+    let kbIdx = -1;
+
+    this.svg.on('keydown.kb', (event: KeyboardEvent) => {
+      if (!['ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Escape') { (this.svg.node() as SVGElement).blur(); return; }
+      kbIdx = event.key === 'ArrowDown'
+        ? Math.min(kbIdx + 1, data.length - 1)
+        : Math.max(kbIdx - 1, 0);
+      if (kbIdx < 0) kbIdx = 0;
+      const d = data[kbIdx];
+      allBars.style('opacity', (other) => (other === d ? 1 : 0.4));
+      const svgRect = this.svg.node()!.getBoundingClientRect();
+      const containerRect = this.config.container.getBoundingClientRect();
+      const px = svgRect.left - containerRect.left + xScale(d.value) + margin.left;
+      const py = svgRect.top - containerRect.top + (yScale(d.label) ?? 0) + yScale.bandwidth() / 2 + margin.top;
+      tooltip.show(d.label, [{ label: 'Wert', value: d.value.toString(), color: barColor }], px, py, tokens);
+    })
+    .on('focus.kb', () => {
+      kbIdx = 0;
+      const d = data[0];
+      allBars.style('opacity', (other) => (other === d ? 1 : 0.4));
+      const svgRect = this.svg.node()!.getBoundingClientRect();
+      const containerRect = this.config.container.getBoundingClientRect();
+      const px = svgRect.left - containerRect.left + xScale(d.value) + margin.left;
+      const py = svgRect.top - containerRect.top + (yScale(d.label) ?? 0) + yScale.bandwidth() / 2 + margin.top;
+      tooltip.show(d.label, [{ label: 'Wert', value: d.value.toString(), color: barColor }], px, py, tokens);
+    })
+    .on('blur.kb', () => {
+      kbIdx = -1;
+      allBars.style('opacity', 1);
+      tooltip.hide();
+    });
 
     // Value labels
     if (this.config.showValueLabels) {
@@ -133,10 +180,13 @@ export class ColumnChart extends BaseChart<ColumnChartConfig> {
         .text((d) => d.value.toString());
     }
 
+    // Annotations (after bars so lines render on top)
+    this.renderAnnotations(g, null, xScale, innerWidth, innerHeight, this.tokens);
+
     // Axes
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call((sel) => renderBottomAxis(sel, xScale as any, { tokens: this.tokens }));
+      .call((sel) => renderBottomAxis(sel, xScale as any, { tokens: this.tokens, innerWidth }));
 
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale as any, { tokens: this.tokens })

@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
-import { createLinearScale, createPointScale, createOrdinalColorScale } from '../../utils/scales';
+import { createLinearScale, createPointScale, buildColorScale } from '../../utils/scales';
 import { renderBottomAxis, renderLeftAxis, renderGridlinesY, renderGridlinesX } from '../../utils/axes';
 import { CHART_CONSTANTS } from '../../constants';
 import type { Datum } from '../bar/bar-chart';
@@ -16,6 +16,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
   private tooltip?: ChartTooltip;
 
   render(): void {
+    if (this.isTooSmall()) return;
     if (this.tooltip) {
       this.tooltip.destroy();
     }
@@ -40,11 +41,13 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
     const xScale = createPointScale(allLabels, [0, innerWidth]);
 
     const allValues = series.flatMap((s) => s.data.map((d) => d.value));
-    const yScale = createLinearScale([0, d3.max(allValues) ?? 0], [innerHeight, 0]);
+    const yMax = this.config.domainY ? this.config.domainY[1] : (d3.max(allValues) ?? 0);
+    const yScale = createLinearScale([0, yMax], [innerHeight, 0]);
 
-    const colorScale = createOrdinalColorScale(
+    const colorScale = buildColorScale(
       series.map((s) => s.name),
-      this.tokens.chartColors
+      this.tokens,
+      this.config.colorScheme
     );
 
     // Gridlines (before data layer)
@@ -128,7 +131,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
           .attr('cy', cy)
           .attr('r', 12)
           .attr('fill', 'transparent')
-          .attr('tabindex', '0')
+          .attr('tabindex', '-1')
           .attr('aria-label', `${s.name} ${d.label}: ${d.value}`)
           .style('cursor', 'pointer')
           .style('outline', 'none')
@@ -226,7 +229,7 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
 
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens }));
+      .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens, innerWidth }));
 
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
@@ -240,5 +243,68 @@ export class AreaChart extends BaseChart<AreaChartConfig> {
       renderLegend(this.config.container, legendItems, this.tokens);
     }
     this.renderCaption(this.tokens);
+
+    // SVG-level keyboard navigation
+    const kbMargin = this.config.margin ?? { top: 20, right: 20, bottom: 40, left: 50 };
+    this.svg
+      .attr('tabindex', '0')
+      .attr('role', 'application')
+      .attr('aria-label', this.config.title ?? 'Chart');
+
+    let kbIdx = -1;
+
+    const showCrosshairAt = (label: string) => {
+      const nearestX = xScale(label) ?? 0;
+      crosshair.style('display', null);
+      crosshair.select('.crosshair-line').attr('x1', nearestX).attr('x2', nearestX);
+      crosshair.selectAll<SVGCircleElement, unknown>('.crosshair-dot').each(function() {
+        const el = d3.select(this);
+        const seriesName = el.attr('data-series');
+        const s = series.find((s) => s.name === seriesName);
+        const point = s?.data.find((dp) => dp.label === label);
+        if (point) {
+          el.attr('cx', nearestX).attr('cy', yScale(point.value));
+        }
+      });
+    };
+
+    const showTooltipAt = (label: string) => {
+      const svgRect = this.svg.node()!.getBoundingClientRect();
+      const containerRect = this.config.container.getBoundingClientRect();
+      const nearestX = xScale(label) ?? 0;
+      const px = svgRect.left - containerRect.left + nearestX + kbMargin.left;
+      const firstSeries = series[0];
+      const firstPoint = firstSeries?.data.find((dp) => dp.label === label);
+      const py = firstPoint
+        ? svgRect.top - containerRect.top + yScale(firstPoint.value) + kbMargin.top
+        : svgRect.top - containerRect.top + kbMargin.top;
+      const rows = series.map((s) => {
+        const point = s.data.find((dp) => dp.label === label);
+        return { label: s.name, value: point ? point.value.toString() : '—', color: colorScale(s.name) };
+      });
+      tooltip.show(label, rows, px, py, tokens);
+    };
+
+    this.svg.on('keydown.kb', (event: KeyboardEvent) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Escape') { (this.svg.node() as SVGElement).blur(); return; }
+      kbIdx = event.key === 'ArrowRight'
+        ? Math.min(kbIdx + 1, allLabels.length - 1)
+        : Math.max(kbIdx - 1, 0);
+      if (kbIdx < 0) kbIdx = 0;
+      showCrosshairAt(allLabels[kbIdx]);
+      showTooltipAt(allLabels[kbIdx]);
+    })
+    .on('focus.kb', () => {
+      kbIdx = 0;
+      showCrosshairAt(allLabels[0]);
+      showTooltipAt(allLabels[0]);
+    })
+    .on('blur.kb', () => {
+      kbIdx = -1;
+      crosshair.style('display', 'none');
+      tooltip.hide();
+    });
   }
 }

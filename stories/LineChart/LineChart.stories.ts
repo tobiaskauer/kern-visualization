@@ -3,6 +3,24 @@ import { LineChart } from '../../src/charts/line/line-chart';
 
 const meta: Meta = {
   title: 'Charts/LineChart',
+  argTypes: {
+    xAxisLabel:  { control: 'text',    name: 'X Axis Label' },
+    yAxisLabel:  { control: 'text',    name: 'Y Axis Label' },
+    caption:     { control: 'text',    name: 'Caption' },
+    animated:    { control: 'boolean', name: 'Animated' },
+    gridlinesY:  { control: 'boolean', name: 'Gridlines' },
+    legend:      { control: 'boolean', name: 'Legend' },
+    colorScheme: { control: { type: 'select' }, options: ['categorical', 'sequential', 'diverging'], name: 'Color Scheme' },
+  },
+  args: {
+    xAxisLabel:  'Quartal',
+    yAxisLabel:  'Umsatz',
+    caption:     '',
+    animated:    true,
+    gridlinesY:  true,
+    legend:      true,
+    colorScheme: 'categorical',
+  },
 };
 
 export default meta;
@@ -28,49 +46,54 @@ const sampleSeries = [
   },
 ];
 
-function createChart(config: any): HTMLElement {
+function createChart(args: any): HTMLElement {
   const container = document.createElement('div');
   container.style.width = '600px';
   container.style.height = '300px';
 
   requestAnimationFrame(() => {
-    const chart = new LineChart({
+    new LineChart({
       container,
-      series: config.series ?? sampleSeries,
+      series: args.series ?? sampleSeries,
       title: 'Quartalsvergleich',
-      animated: true,
-      xAxisLabel: config.xAxisLabel,
-      yAxisLabel: config.yAxisLabel,
-      gridlines: config.gridlines,
-      annotations: config.annotations,
-      legend: config.legend,
-    });
-    chart.render();
+      animated: args.animated,
+      xAxisLabel: args.xAxisLabel || undefined,
+      yAxisLabel: args.yAxisLabel || undefined,
+      caption: args.caption || undefined,
+      gridlines: { y: args.gridlinesY },
+      legend: args.legend,
+      colorScheme: args.colorScheme,
+      annotations: args.annotations,
+    }).render();
   });
 
   return container;
 }
 
 export const Default: StoryObj = {
-  render: () => createChart({}),
+  render: (args) => createChart(args),
   name: 'Default',
 };
 
 export const SingleSeries: StoryObj = {
-  render: () => createChart({ series: [sampleSeries[0]] }),
+  render: (args) => createChart({ ...args, series: [sampleSeries[0]] }),
   name: 'Single Series',
 };
 
-export const WithAxisLabels: StoryObj = {
-  render: () => createChart({ xAxisLabel: 'Quartal', yAxisLabel: 'Umsatz' }),
-  name: 'With Axis Labels',
+export const WithAnnotations: StoryObj = {
+  render: (args) => createChart(args),
+  name: 'With Annotations',
+  args: { annotations: [{ axis: 'y', value: 65, label: 'Zielwert' }] },
 };
 
-export const WithAnnotations: StoryObj = {
-  render: () => createChart({
-    annotations: [
-      { axis: 'y', value: 65, label: 'Zielwert' },
-    ],
-  }),
-  name: 'With Annotations',
+const singlePointSeries = [
+  {
+    name: 'Produkt A',
+    data: [{ label: 'Q1', value: 42 }],
+  },
+];
+
+export const SinglePoint: StoryObj = {
+  render: (args) => createChart({ ...args, series: singlePointSeries }),
+  name: 'Single Data Point (Don\'t)',
 };

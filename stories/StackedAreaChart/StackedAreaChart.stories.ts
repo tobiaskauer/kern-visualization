@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/html';
-import { AreaChart } from '../../src/charts/area/area-chart';
+import { StackedAreaChart } from '../../src/charts/stacked-area/stacked-area-chart';
 
 const meta: Meta = {
-  title: 'Charts/AreaChart',
+  title: 'Charts/StackedAreaChart',
   argTypes: {
     xAxisLabel: { control: 'text',    name: 'X Axis Label' },
     yAxisLabel: { control: 'text',    name: 'Y Axis Label' },
@@ -13,7 +13,7 @@ const meta: Meta = {
   },
   args: {
     xAxisLabel: 'Monat',
-    yAxisLabel: 'Einnahmen (€)',
+    yAxisLabel: 'Sitzungen',
     caption:    '',
     animated:   true,
     gridlinesY: true,
@@ -23,29 +23,13 @@ const meta: Meta = {
 
 export default meta;
 
-const sampleSeries = [
-  {
-    name: 'Einnahmen',
-    data: [
-      { label: 'Jan', value: 30 },
-      { label: 'Feb', value: 50 },
-      { label: 'Mär', value: 45 },
-      { label: 'Apr', value: 70 },
-      { label: 'Mai', value: 65 },
-      { label: 'Jun', value: 85 },
-    ],
-  },
-  {
-    name: 'Ausgaben',
-    data: [
-      { label: 'Jan', value: 20 },
-      { label: 'Feb', value: 35 },
-      { label: 'Mär', value: 30 },
-      { label: 'Apr', value: 55 },
-      { label: 'Mai', value: 48 },
-      { label: 'Jun', value: 60 },
-    ],
-  },
+const series = ['Desktop', 'Mobile', 'Tablet'];
+const sampleData = [
+  { label: 'Jan', Desktop: 40, Mobile: 25, Tablet: 10 },
+  { label: 'Feb', Desktop: 45, Mobile: 30, Tablet: 12 },
+  { label: 'Mär', Desktop: 38, Mobile: 35, Tablet: 11 },
+  { label: 'Apr', Desktop: 50, Mobile: 40, Tablet: 15 },
+  { label: 'Mai', Desktop: 55, Mobile: 42, Tablet: 14 },
 ];
 
 function createChart(args: any): HTMLElement {
@@ -54,10 +38,11 @@ function createChart(args: any): HTMLElement {
   container.style.height = '300px';
 
   requestAnimationFrame(() => {
-    new AreaChart({
+    new StackedAreaChart({
       container,
-      series: args.series ?? sampleSeries,
-      title: 'Einnahmenverlauf',
+      data: args.data ?? sampleData,
+      series,
+      title: 'Gerätenutzung über Zeit',
       animated: args.animated,
       xAxisLabel: args.xAxisLabel || undefined,
       yAxisLabel: args.yAxisLabel || undefined,
@@ -76,13 +61,13 @@ export const Default: StoryObj = {
   name: 'Default',
 };
 
-export const SingleSeries: StoryObj = {
-  render: (args) => createChart({ ...args, series: [sampleSeries[0]] }),
-  name: 'Single Series',
-};
-
 export const WithAnnotations: StoryObj = {
   render: (args) => createChart(args),
   name: 'With Annotations',
-  args: { annotations: [{ axis: 'y', value: 60, label: 'Zielwert' }] },
+  args: { annotations: [{ axis: 'y', value: 80, label: 'Kapazität' }] },
+};
+
+export const EmptyState: StoryObj = {
+  render: (args) => createChart({ ...args, data: [] }),
+  name: 'Empty State',
 };

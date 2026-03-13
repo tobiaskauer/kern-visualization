@@ -1,51 +1,34 @@
 import type { Meta, StoryObj } from '@storybook/html';
-import { AreaChart } from '../../src/charts/area/area-chart';
+import { StackedColumnChart } from '../../src/charts/stacked-bar/stacked-column-chart';
 
 const meta: Meta = {
-  title: 'Charts/AreaChart',
+  title: 'Charts/StackedColumnChart',
   argTypes: {
     xAxisLabel: { control: 'text',    name: 'X Axis Label' },
     yAxisLabel: { control: 'text',    name: 'Y Axis Label' },
     caption:    { control: 'text',    name: 'Caption' },
     animated:   { control: 'boolean', name: 'Animated' },
-    gridlinesY: { control: 'boolean', name: 'Gridlines' },
+    gridlinesX: { control: 'boolean', name: 'Gridlines' },
     legend:     { control: 'boolean', name: 'Legend' },
   },
   args: {
-    xAxisLabel: 'Monat',
-    yAxisLabel: 'Einnahmen (€)',
+    xAxisLabel: 'Besucher',
+    yAxisLabel: 'Monat',
     caption:    '',
     animated:   true,
-    gridlinesY: true,
+    gridlinesX: true,
     legend:     true,
   },
 };
 
 export default meta;
 
-const sampleSeries = [
-  {
-    name: 'Einnahmen',
-    data: [
-      { label: 'Jan', value: 30 },
-      { label: 'Feb', value: 50 },
-      { label: 'Mär', value: 45 },
-      { label: 'Apr', value: 70 },
-      { label: 'Mai', value: 65 },
-      { label: 'Jun', value: 85 },
-    ],
-  },
-  {
-    name: 'Ausgaben',
-    data: [
-      { label: 'Jan', value: 20 },
-      { label: 'Feb', value: 35 },
-      { label: 'Mär', value: 30 },
-      { label: 'Apr', value: 55 },
-      { label: 'Mai', value: 48 },
-      { label: 'Jun', value: 60 },
-    ],
-  },
+const series = ['Direkt', 'Organisch', 'Referral'];
+const sampleData = [
+  { label: 'Jan', Direkt: 20, Organisch: 15, Referral: 7 },
+  { label: 'Feb', Direkt: 25, Organisch: 20, Referral: 10 },
+  { label: 'Mär', Direkt: 18, Organisch: 12, Referral: 5 },
+  { label: 'Apr', Direkt: 30, Organisch: 25, Referral: 12 },
 ];
 
 function createChart(args: any): HTMLElement {
@@ -54,15 +37,17 @@ function createChart(args: any): HTMLElement {
   container.style.height = '300px';
 
   requestAnimationFrame(() => {
-    new AreaChart({
+    new StackedColumnChart({
       container,
-      series: args.series ?? sampleSeries,
-      title: 'Einnahmenverlauf',
+      data: args.data ?? sampleData,
+      series,
+      title: 'Traffic-Quellen',
       animated: args.animated,
+      margin: { top: 20, right: 20, bottom: 40, left: 80 },
       xAxisLabel: args.xAxisLabel || undefined,
       yAxisLabel: args.yAxisLabel || undefined,
       caption: args.caption || undefined,
-      gridlines: { y: args.gridlinesY },
+      gridlines: { x: args.gridlinesX },
       legend: args.legend,
       annotations: args.annotations,
     }).render();
@@ -76,13 +61,13 @@ export const Default: StoryObj = {
   name: 'Default',
 };
 
-export const SingleSeries: StoryObj = {
-  render: (args) => createChart({ ...args, series: [sampleSeries[0]] }),
-  name: 'Single Series',
-};
-
 export const WithAnnotations: StoryObj = {
   render: (args) => createChart(args),
   name: 'With Annotations',
-  args: { annotations: [{ axis: 'y', value: 60, label: 'Zielwert' }] },
+  args: { annotations: [{ axis: 'x', value: 40, label: 'Ziel' }] },
+};
+
+export const EmptyState: StoryObj = {
+  render: (args) => createChart({ ...args, data: [] }),
+  name: 'Empty State',
 };

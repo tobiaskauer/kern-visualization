@@ -1,0 +1,28 @@
+import { Meta, Story, Canvas } from '@storybook/blocks';
+import * as BarChartStories from './BarChart.stories';
+
+<Meta title="Docs/BarChart" />
+
+# Bar Chart
+
+## When to use
+
+Use a bar chart when comparing discrete categories where order does not inherently matter — for example, survey responses, product comparisons, or performance across regions. Horizontal bars are especially well-suited when category names are long, as there is more horizontal space for labels than in a column chart.
+
+## When NOT to use
+
+Do not use a bar chart for time-series data — prefer a line chart when the x-axis represents continuous time. Avoid it for part-of-whole comparisons (use a stacked bar chart instead), and do not use it for continuous distributions (use a histogram).
+
+## Do — clear comparison with a manageable number of categories
+
+<Canvas>
+  <Story of={BarChartStories.Default} />
+</Canvas>
+
+## Don't — too many bars
+
+Avoid using a bar chart with more than 12 categories. When there are too many bars the chart becomes difficult to read and compare. Consider grouping, filtering, or switching to a table.
+
+<Canvas>
+  <Story of={BarChartStories.TooManyBars} />
+</Canvas>

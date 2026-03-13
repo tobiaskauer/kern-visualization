@@ -1,0 +1,28 @@
+import { Meta, Story, Canvas } from '@storybook/blocks';
+import * as ScatterChartStories from './ScatterChart.stories';
+
+<Meta title="Docs/ScatterChart" />
+
+# Scatter Chart
+
+## When to use
+
+Use a scatter chart to reveal correlation or distribution between two continuous variables. When a third dimension is available, encode it via color using the diverging color scale (the `z` field) to show whether each point sits above or below a midpoint.
+
+## When NOT to use
+
+Avoid scatter charts when the x-axis contains discrete or categorical values — use a bar or column chart instead. With fewer than approximately 10 data points, no reliable pattern can be read from the scatter; prefer a table or simple bar chart.
+
+## Do — scatter with z-encoded color showing correlation
+
+<Canvas>
+  <Story of={ScatterChartStories.Default} />
+</Canvas>
+
+## Don't — too few data points (no pattern readable)
+
+With only 4 points, a scatter chart adds visual complexity without conveying a real pattern. A simple bar chart would communicate the same data more directly.
+
+<Canvas>
+  <Story of={ScatterChartStories.TooFewPoints} />
+</Canvas>

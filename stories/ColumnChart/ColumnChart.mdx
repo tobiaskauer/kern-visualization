@@ -1,0 +1,28 @@
+import { Meta, Story, Canvas } from '@storybook/blocks';
+import * as ColumnChartStories from './ColumnChart.stories';
+
+<Meta title="Docs/ColumnChart" />
+
+# Column Chart
+
+## When to use
+
+Use a column chart when the x-axis has an implied order — for example months, quarters, or ranked items — and when category names are short enough to fit comfortably below each bar. Vertical bars naturally communicate sequence or progression from left to right.
+
+## When NOT to use
+
+Avoid column charts when category labels are long; the labels will overlap or need rotation, making the chart hard to read. If you have more than 8–10 categories, consider a bar chart (horizontal) or grouping the data.
+
+## Do — time-ordered categories with short labels
+
+<Canvas>
+  <Story of={ColumnChartStories.Default} />
+</Canvas>
+
+## Don't — long category labels that get clipped
+
+Avoid using a column chart when labels are long. The labels overlap or get rotated awkwardly, making the chart hard to scan. Use a horizontal bar chart instead.
+
+<Canvas>
+  <Story of={ColumnChartStories.LongLabels} />
+</Canvas>

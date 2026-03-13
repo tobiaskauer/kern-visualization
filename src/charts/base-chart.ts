@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { getTokens, type KernTokens } from '../tokens/kern-tokens';
 import { createResizeObserver } from '../utils/resize-observer';
+import type { ColorScheme } from '../utils/scales';
 
 export interface Annotation {
   axis: 'x' | 'y';
@@ -12,6 +13,7 @@ export interface BaseChartConfig {
   container: HTMLElement;
   width?: number;
   height?: number;
+  minWidth?: number;
   margin?: { top: number; right: number; bottom: number; left: number };
   title?: string;
   description?: string;
@@ -22,6 +24,9 @@ export interface BaseChartConfig {
   annotations?: Annotation[];
   legend?: boolean;
   caption?: string;
+  colorScheme?: ColorScheme;
+  domainX?: string[];
+  domainY?: [number, number];
 }
 
 export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -99,6 +104,33 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
     return this.svg
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
+  }
+
+  protected isTooSmall(): boolean {
+    const minWidth = this.config.minWidth ?? 200;
+    const width = this.config.width ?? this.config.container.clientWidth;
+    if (width >= minWidth) return false;
+
+    d3.select(this.config.container).selectAll('svg').remove();
+    this.config.container.querySelector('.kern-chart-legend')?.remove();
+    this.config.container.querySelector('.kern-chart-caption')?.remove();
+
+    const tokens = getTokens(this.config.container);
+    d3.select(this.config.container)
+      .append('svg')
+      .attr('width', width)
+      .attr('height', this.getTotalHeight())
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', this.getTotalHeight() / 2)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', tokens.colorTextMuted)
+      .attr('font-family', tokens.fontFamily)
+      .attr('font-size', tokens.fontSizeSmall || '12px')
+      .text('Chart too small');
+
+    return true;
   }
 
   abstract render(): void;

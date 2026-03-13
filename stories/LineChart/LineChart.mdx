@@ -1,0 +1,28 @@
+import { Meta, Story, Canvas } from '@storybook/blocks';
+import * as LineChartStories from './LineChart.stories';
+
+<Meta title="Docs/LineChart" />
+
+# Line Chart
+
+## When to use
+
+Use a line chart when you want to show trends over time or across a continuous ordered dimension. It is ideal for comparing multiple series across the same x-axis, making it easy to spot relative movements and crossover points.
+
+## When NOT to use
+
+Do not use a line chart when you have fewer than 3 data points — a bar chart communicates discrete values more clearly. Avoid it for unordered categories, and limit yourself to 5–6 series at most; more lines produce visual clutter that is difficult to untangle.
+
+## Do — multi-series trend comparison
+
+<Canvas>
+  <Story of={LineChartStories.Default} />
+</Canvas>
+
+## Don't — single data point (no trend visible)
+
+A line chart with only a single data point renders as a dot and communicates no trend. Use a bar chart for single-point comparisons.
+
+<Canvas>
+  <Story of={LineChartStories.SinglePoint} />
+</Canvas>

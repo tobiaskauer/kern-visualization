@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { BaseChart, type BaseChartConfig } from '../base-chart';
-import { createBandScale, createLinearScale, createOrdinalColorScale } from '../../utils/scales';
+import { createBandScale, createLinearScale, buildColorScale } from '../../utils/scales';
 import { renderBottomAxis, renderLeftAxis, renderGridlinesX } from '../../utils/axes';
 import type { StackedDatum } from './stacked-bar-chart';
 import { ChartTooltip } from '../../utils/tooltip';
@@ -15,6 +15,7 @@ export class StackedColumnChart extends BaseChart<StackedColumnChartConfig> {
   private tooltip?: ChartTooltip;
 
   render(): void {
+    if (this.isTooSmall()) return;
     if (this.tooltip) {
       this.tooltip.destroy();
     }
@@ -35,7 +36,7 @@ export class StackedColumnChart extends BaseChart<StackedColumnChartConfig> {
       return;
     }
 
-    const colorScale = createOrdinalColorScale(series, this.tokens.chartColors);
+    const colorScale = buildColorScale(series, this.tokens, 'categorical');
     const stackedData = d3.stack<StackedDatum>().keys(series)(data);
 
     const maxVal = d3.max(stackedData[stackedData.length - 1], (d) => d[1]) ?? 0;
@@ -74,7 +75,7 @@ export class StackedColumnChart extends BaseChart<StackedColumnChartConfig> {
       .attr('height', yScale.bandwidth())
       .attr('x', (d) => xScale(d[0]))
       .attr('width', (d) => xScale(d[1]) - xScale(d[0]))
-      .attr('tabindex', '0')
+      .attr('tabindex', '-1')
       .attr('aria-label', function (this: SVGRectElement, d) {
         const seriesName = (d3.select(this.parentElement as unknown as SVGGElement).datum() as d3.Series<StackedDatum, string>)?.key ?? '';
         const label = (d.data as StackedDatum).label;
@@ -123,7 +124,7 @@ export class StackedColumnChart extends BaseChart<StackedColumnChartConfig> {
 
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens }));
+      .call((sel) => renderBottomAxis(sel, xScale, { tokens: this.tokens, innerWidth }));
 
     g.append('g').call((sel) =>
       renderLeftAxis(sel, yScale, { tokens: this.tokens })
@@ -137,5 +138,55 @@ export class StackedColumnChart extends BaseChart<StackedColumnChartConfig> {
       renderLegend(this.config.container, legendItems, this.tokens);
     }
     this.renderCaption(this.tokens);
+
+    // SVG-level keyboard navigation (ArrowUp/Down through group labels)
+    const kbMargin = this.config.margin ?? { top: 20, right: 20, bottom: 40, left: 50 };
+    const groupLabels = data.map((d) => d.label);
+
+    this.svg
+      .attr('tabindex', '0')
+      .attr('role', 'application')
+      .attr('aria-label', this.config.title ?? 'Chart');
+
+    let kbIdx = -1;
+
+    const showGroupTooltip = (label: string) => {
+      const rowDatum = data.find((d) => d.label === label);
+      const rows = series.map((s) => ({
+        label: s,
+        value: rowDatum ? String(rowDatum[s] ?? 0) : '—',
+        color: colorScale(s),
+      }));
+      const svgRect = this.svg.node()!.getBoundingClientRect();
+      const containerRect = this.config.container.getBoundingClientRect();
+      const px = svgRect.left - containerRect.left + xScale(maxVal) + kbMargin.left;
+      const py = svgRect.top - containerRect.top + (yScale(label) ?? 0) + yScale.bandwidth() / 2 + kbMargin.top;
+      g.selectAll<SVGRectElement, d3.SeriesPoint<StackedDatum>>('rect')
+        .style('opacity', function (this: SVGRectElement) {
+          const ld = (d3.select(this).datum() as d3.SeriesPoint<StackedDatum>).data as StackedDatum;
+          return ld.label === label ? 1 : 0.4;
+        });
+      tooltip.show(label, rows, px, py, tokens);
+    };
+
+    this.svg.on('keydown.kb', (event: KeyboardEvent) => {
+      if (!['ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Escape') { (this.svg.node() as SVGElement).blur(); return; }
+      kbIdx = event.key === 'ArrowDown'
+        ? Math.min(kbIdx + 1, groupLabels.length - 1)
+        : Math.max(kbIdx - 1, 0);
+      if (kbIdx < 0) kbIdx = 0;
+      showGroupTooltip(groupLabels[kbIdx]);
+    })
+    .on('focus.kb', () => {
+      kbIdx = 0;
+      showGroupTooltip(groupLabels[0]);
+    })
+    .on('blur.kb', () => {
+      kbIdx = -1;
+      g.selectAll<SVGRectElement, d3.SeriesPoint<StackedDatum>>('rect').style('opacity', 1);
+      tooltip.hide();
+    });
   }
 }
