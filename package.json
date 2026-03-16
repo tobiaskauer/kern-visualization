@@ -13,8 +13,7 @@
     "d3": "^7"
   },
   "devDependencies": {
-    "@kern-ux/native": "file:../kern-ux-plain",
-    "@storybook/addon-a11y": "^9",
+"@storybook/addon-a11y": "^9",
     "@storybook/addon-docs": "^9",
     "@storybook/html-vite": "^9",
     "@types/d3": "^7",

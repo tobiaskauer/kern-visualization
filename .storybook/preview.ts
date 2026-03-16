@@ -1,5 +1,5 @@
-import '@kern-ux/native/dist/fonts/fira-sans.css';
-import '@kern-ux/native/dist/kern.css';
+import '../vendor/kern/fonts/fira-sans.css';
+import '../vendor/kern/kern.css';
 import type { Preview } from '@storybook/html';
 
 export const globalTypes = {

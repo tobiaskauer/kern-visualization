@@ -13,7 +13,7 @@ const config: StorybookConfig = {
     name: '@storybook/html-vite',
     options: {},
   },
-  staticDirs: ['../node_modules/@kern-ux/native/dist'],
+  staticDirs: ['../vendor/kern'],
 };
 
 export default config;
