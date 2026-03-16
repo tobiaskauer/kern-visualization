@@ -1,28 +1,72 @@
-import { Meta, Story, Canvas } from '@storybook/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
 import * as BarChartStories from './BarChart.stories';
 
-<Meta title="Docs/BarChart" />
+<Meta of={BarChartStories} />
 
-# Bar Chart
+# Balkendiagramm
 
-## When to use
+## Wann verwenden
 
-Use a bar chart when comparing discrete categories where order does not inherently matter — for example, survey responses, product comparisons, or performance across regions. Horizontal bars are especially well-suited when category names are long, as there is more horizontal space for labels than in a column chart.
+Verwende ein horizontales Balkendiagramm, wenn du diskrete, ungeordnete Kategorien vergleichst — zum Beispiel Umfrageergebnisse, Produktleistungen oder Rankings. Horizontale Balken sind besonders effektiv bei langen Kategoriebezeichnungen, da links neben den Balken ausreichend Platz vorhanden ist.
 
-## When NOT to use
+**Balken von groß nach klein sortieren** — es sei denn, die Kategorien haben eine sinnvolle inhärente Reihenfolge. Die Sortierung macht Unterschiede sofort lesbar und erspart den Leser:innen das Hin- und Herspringen.
 
-Do not use a bar chart for time-series data — prefer a line chart when the x-axis represents continuous time. Avoid it for part-of-whole comparisons (use a stacked bar chart instead), and do not use it for continuous distributions (use a histogram).
+**Die Achse beginnt immer bei null.** Ein abgeschnittener Nullpunkt übertreibt Unterschiede und täuscht über das tatsächliche Ausmaß der Werte.
 
-## Do — clear comparison with a manageable number of categories
+**Entweder Beschriftungen oder Gitterlinien — nicht beides.** Direkte Wertbeschriftungen an den Balken machen Gitterlinien überflüssig. Wähle ein Referenzsystem und wende es konsequent an.
 
-<Canvas>
-  <Story of={BarChartStories.Default} />
-</Canvas>
+## Wann NICHT verwenden
 
-## Don't — too many bars
+- **Zeitreihen** — verwende ein Liniendiagramm, wenn die x-Achse kontinuierliche Zeit darstellt.
+- **Teil-Ganzes-Vergleiche** — verwende ein gestapeltes Balkendiagramm, wenn Segmente zu einem Gesamtwert addiert werden sollen.
+- **Zu viele Kategorien** — mehr als 12 Balken sind schwer zu überblicken; ziehe Gruppierung, Filterung oder eine Tabelle in Betracht.
+- **Kontinuierliche Verteilungen** — verwende ein Histogramm, kein Balkendiagramm.
 
-Avoid using a bar chart with more than 12 categories. When there are too many bars the chart becomes difficult to read and compare. Consider grouping, filtering, or switching to a table.
+## So — sortierte Balken mit klaren Beschriftungen
 
-<Canvas>
-  <Story of={BarChartStories.TooManyBars} />
-</Canvas>
+<Canvas of={BarChartStories.Default} />
+
+## So nicht — zu viele Balken
+
+Bei mehr als 12 Kategorien wird ein Balkendiagramm kognitiv überfordernd. Leser:innen können Werte auf einen Blick weder zuverlässig einordnen noch vergleichen. Ziehe eine Aggregation, die Anzeige der Top-N-Werte oder eine Datentabelle in Betracht.
+
+<Canvas of={BarChartStories.TooManyBars} />
+
+## Konfiguration
+
+### Balkendiagramm-Optionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>data</code></td><td><code>Datum[]</code></td><td>—</td><td>Datenpunkte als Array von <code>{'{ label: string; value: number }'}</code> (erforderlich)</td></tr>
+    <tr><td><code>showValueLabels</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Zeigt den Wert am Ende jedes Balkens</td></tr>
+    <tr><td><code>sort</code></td><td><code>'none'</code>, <code>'asc'</code>, <code>'desc'</code></td><td><code>'none'</code></td><td>Sortierreihenfolge der Balken</td></tr>
+  </tbody>
+</table>
+
+### Gemeinsame Basisoptionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>container</code></td><td><code>HTMLElement</code></td><td>—</td><td>Ziel-DOM-Element (erforderlich)</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>SVG-Titel für Screenreader (<code>aria-labelledby</code>)</td></tr>
+    <tr><td><code>animated</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Ein-/Ausblendanimation beim Rendern</td></tr>
+    <tr><td><code>gridlines</code></td><td><code>{'{ x?: boolean; y?: boolean }'}</code></td><td>—</td><td>Gitterlinien ein-/ausschalten</td></tr>
+    <tr><td><code>xAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der x-Achse</td></tr>
+    <tr><td><code>yAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der y-Achse</td></tr>
+    <tr><td><code>caption</code></td><td><code>string</code></td><td>—</td><td>Bildunterschrift unterhalb des Diagramms</td></tr>
+    <tr><td><code>annotations</code></td><td><code>Annotation[]</code></td><td>—</td><td>Referenzlinien mit optionalem Label (<code>{'{ axis, value, label? }'}</code>)</td></tr>
+    <tr><td><code>colorScheme</code></td><td><code>'categorical'</code>, <code>'sequential'</code>, <code>'diverging'</code></td><td><code>'categorical'</code></td><td>Farbschema</td></tr>
+    <tr><td><code>height</code></td><td><code>number</code></td><td><code>300</code></td><td>Höhe in Pixeln</td></tr>
+    <tr><td><code>minWidth</code></td><td><code>number</code></td><td><code>280</code></td><td>Mindestbreite; darunter erscheint horizontaler Scroll</td></tr>
+    <tr><td><code>margin</code></td><td><code>{'{ top, right, bottom, left }'}</code></td><td><code>20/20/40/50</code></td><td>Innenabstand in Pixeln</td></tr>
+  </tbody>
+</table>
+
+## Barrierefreiheit
+
+Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+
+Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) für eine Referenzimplementierung.

@@ -1,3 +1,5 @@
+import '@kern-ux/native/dist/fonts/fira-sans.css';
+import '@kern-ux/native/dist/kern.css';
 import type { Preview } from '@storybook/html';
 
 export const globalTypes = {
@@ -23,9 +25,9 @@ export const decorators = [
     const theme = context.globals.kernTheme || 'light';
     const wrapper = document.createElement('div');
     wrapper.setAttribute('data-kern-theme', theme);
+    wrapper.className = 'kern-story-wrapper';
     wrapper.style.background = 'var(--kern-color-layout-background-default)';
-    wrapper.style.padding = '24px';
-    wrapper.style.minHeight = '100vh';
+    wrapper.style.minHeight = 'fit-content';
     const storyEl = Story(context);
     if (storyEl instanceof HTMLElement) {
       wrapper.appendChild(storyEl);
@@ -40,6 +42,16 @@ const preview: Preview = {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i,
+      },
+    },
+    options: {
+      storySort: {
+        order: ['Einführung', 'Charts'],
+      },
+    },
+    docs: {
+      canvas: {
+        style: { padding: 0 },
       },
     },
   },

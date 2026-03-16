@@ -1,34 +1,119 @@
----
-title: Introduction
----
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Einführung" />
 
 # KERN Visualization
 
-Data visualization components for the KERN UX design system.
+KERN Visualization ist eine Sammlung von Datenvisualisierungskomponenten für das KERN UX Design System. Die Komponenten lesen KERN CSS Custom Properties direkt aus — sie spiegeln automatisch das aktive Theme (Hell/Dunkel) wider, ohne zusätzliche Konfiguration.
 
-Built with vanilla TypeScript and D3.js, these components read KERN CSS custom properties directly, ensuring they always reflect the current theme (light/dark) without any extra configuration.
+Gebaut mit **TypeScript** und **D3.js**, kein Framework erforderlich.
 
-## Usage
+---
+
+## Diagrammtypen
+
+<table>
+  <thead><tr><th>Komponente</th><th>Einsatzbereich</th></tr></thead>
+  <tbody>
+    <tr><td><strong>BarChart</strong></td><td>Kategorienvergleich mit horizontalen Balken</td></tr>
+    <tr><td><strong>ColumnChart</strong></td><td>Zeitreihen und geordnete Kategorien mit vertikalen Säulen</td></tr>
+    <tr><td><strong>StackedBarChart</strong></td><td>Teil-Ganzes-Vergleich, horizontal gestapelt</td></tr>
+    <tr><td><strong>StackedColumnChart</strong></td><td>Teil-Ganzes-Vergleich, vertikal gestapelt</td></tr>
+    <tr><td><strong>LineChart</strong></td><td>Trendverläufe über Zeit, mehrere Datenreihen</td></tr>
+    <tr><td><strong>AreaChart</strong></td><td>Trendverläufe mit Flächenfüllung</td></tr>
+    <tr><td><strong>StackedAreaChart</strong></td><td>Gestapelte Flächen für kumulierte Werte</td></tr>
+    <tr><td><strong>ScatterPlot</strong></td><td>Korrelation und Verteilung zweier kontinuierlicher Variablen</td></tr>
+  </tbody>
+</table>
+
+---
+
+## Schnellstart
 
 ```ts
 import { BarChart } from 'kern-visualization';
 
 const chart = new BarChart({
   container: document.getElementById('chart')!,
-  data: [{ label: 'Jan', value: 42 }],
-  title: 'Monthly totals',
+  data: [
+    { label: 'Jan', value: 42 },
+    { label: 'Feb', value: 67 },
+    { label: 'Mär', value: 55 },
+  ],
+  title: 'Monatliche Umsätze',
+  xAxisLabel: 'Monat',
+  yAxisLabel: 'Umsatz (€)',
   animated: true,
+  gridlines: { y: true },
 });
+
 chart.render();
 ```
 
-## Charts
+Alle Diagramme folgen demselben Muster: Instanz mit Konfiguration erstellen, `.render()` aufrufen. Beim Anpassen von Parametern `.update()` aufrufen oder eine neue Instanz erstellen.
 
-- **BarChart** — vertical bars
-- **ColumnChart** — horizontal bars
-- **StackedBarChart** — stacked vertical bars
-- **StackedColumnChart** — stacked horizontal bars
-- **LineChart** — multi-series line chart
-- **AreaChart** — area chart with optional fill
-- **StackedAreaChart** — stacked area chart
-- **ScatterChart** — scatter plot
+---
+
+## Konfigurationsoptionen
+
+Alle Diagramme teilen eine gemeinsame Basisschnittstelle:
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>container</code></td><td><code>HTMLElement</code></td><td>DOM-Element, in das das Diagramm gerendert wird</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>Barrierefreiheitstitel (SVG <code>&lt;title&gt;</code>)</td></tr>
+    <tr><td><code>animated</code></td><td><code>boolean</code></td><td>Ein- und Ausblendanimation beim Rendern</td></tr>
+    <tr><td><code>gridlines</code></td><td><code>{'{ x?, y? }'}</code></td><td>Gitterlinien ein-/ausschalten</td></tr>
+    <tr><td><code>xAxisLabel</code></td><td><code>string</code></td><td>Beschriftung der x-Achse</td></tr>
+    <tr><td><code>yAxisLabel</code></td><td><code>string</code></td><td>Beschriftung der y-Achse</td></tr>
+    <tr><td><code>caption</code></td><td><code>string</code></td><td>Bildunterschrift unterhalb des Diagramms</td></tr>
+    <tr><td><code>colorScheme</code></td><td><code>'categorical'</code>, <code>'sequential'</code>, <code>'diverging'</code></td><td>Farbschema</td></tr>
+    <tr><td><code>annotations</code></td><td><code>Annotation[]</code></td><td>Referenzlinien mit optionalem Label</td></tr>
+    <tr><td><code>legend</code></td><td><code>boolean</code></td><td>Legende ein-/ausschalten</td></tr>
+  </tbody>
+</table>
+
+---
+
+## Farbschemata
+
+Drei Paletten stehen zur Verfügung, alle aus den KERN Design Tokens abgeleitet:
+
+- **`categorical`** — 8 distinkte Farben für ungeordnete Kategorien (Standard)
+- **`sequential`** — Blaureihe von hell nach dunkel für ordinale oder gerankte Daten
+- **`diverging`** — Türkis → Neutral → Rot für Werte um einen Mittelpunkt (z. B. Abweichungen vom Zielwert)
+
+Das Farbschema reagiert automatisch auf das aktive KERN-Theme (Hell/Dunkel).
+
+---
+
+## Responsivität
+
+Diagramme passen sich automatisch der Containerbreite an. Die Mindestbreite beträgt 280 px — wird dieser Wert unterschritten, wird das Diagramm in einem horizontal scrollbaren Bereich dargestellt. Ein `ResizeObserver` sorgt dafür, dass das Diagramm bei Größenänderung des Containers automatisch neu gerendert wird.
+
+---
+
+## Barrierefreiheit
+
+Jedes Diagramm ist mit einem SVG-`<title>` für Screenreader ausgestattet und unterstützt Tastaturnavigation: Mit den Pfeiltasten kann zwischen Datenpunkten navigiert werden, `Escape` verlässt das Diagramm. Für maximale Zugänglichkeit empfehlen wir zusätzlich eine Datentabelle als Textalternative — idealerweise über eine Tab-Navigation erreichbar (siehe [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193)).
+
+---
+
+## Small Multiples
+
+Für den Vergleich mehrerer Facetten steht die `SmallMultiples`-Komponente zur Verfügung:
+
+```ts
+import { SmallMultiples } from 'kern-visualization';
+
+new SmallMultiples({
+  container: document.getElementById('grid')!,
+  type: 'BarChart',
+  data: flatData,
+  facetKey: 'region',
+  columns: 3,
+}).render();
+```
+
+Skalen werden automatisch über alle Facetten hinweg synchronisiert.

@@ -1,28 +1,70 @@
-import { Meta, Story, Canvas } from '@storybook/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
 import * as ColumnChartStories from './ColumnChart.stories';
 
-<Meta title="Docs/ColumnChart" />
+<Meta of={ColumnChartStories} />
 
-# Column Chart
+# Säulendiagramm
 
-## When to use
+## Wann verwenden
 
-Use a column chart when the x-axis has an implied order — for example months, quarters, or ranked items — and when category names are short enough to fit comfortably below each bar. Vertical bars naturally communicate sequence or progression from left to right.
+Verwende ein vertikales Säulendiagramm, wenn die x-Achse eine **implizite Reihenfolge** hat — zum Beispiel Monate, Quartale, Altersgruppen oder gerankte Einträge. Vertikale Balken werden von links nach rechts natürlich gelesen und kommunizieren Sequenz oder Verlauf.
 
-## When NOT to use
+Säulendiagramme funktionieren am besten mit **kurzen Kategoriebeschriftungen**, die problemlos unter den Balken Platz finden — ohne Rotation oder Abschneiden.
 
-Avoid column charts when category labels are long; the labels will overlap or need rotation, making the chart hard to read. If you have more than 8–10 categories, consider a bar chart (horizontal) or grouping the data.
+**Die y-Achse beginnt immer bei null.** Ein nicht bei null beginnender Nullpunkt verzerrt die wahrgenommenen Unterschiede zwischen den Balken.
 
-## Do — time-ordered categories with short labels
+## Wann NICHT verwenden
 
-<Canvas>
-  <Story of={ColumnChartStories.Default} />
-</Canvas>
+- **Lange Beschriftungen** — wenn Beschriftungen gedreht oder abgeschnitten werden müssen, wechsle zu einem horizontalen Balkendiagramm.
+- **Mehr als 8–10 Kategorien** — die Säulen werden zu schmal zum Lesen; gruppiere die Daten oder verwende ein Balkendiagramm.
+- **Ungeordnete Kategorien** — wenn die Reihenfolge beliebig ist, ist ein nach Wert sortiertes horizontales Balkendiagramm klarer.
+- **Mehrere Datenreihen mit direktem Vergleich** — ein gruppiertes Säulendiagramm kann funktionieren, bei mehr als 2 Reihen ist jedoch ein Liniendiagramm vorzuziehen.
 
-## Don't — long category labels that get clipped
+## So — zeitlich geordnete Kategorien mit kurzen Beschriftungen
 
-Avoid using a column chart when labels are long. The labels overlap or get rotated awkwardly, making the chart hard to scan. Use a horizontal bar chart instead.
+<Canvas of={ColumnChartStories.Default} />
 
-<Canvas>
-  <Story of={ColumnChartStories.LongLabels} />
-</Canvas>
+## So nicht — lange Beschriftungen, die sich überlappen oder ungünstig drehen
+
+Bei langen Kategoriebeschriftungen zwingen Säulendiagramme dazu, Beschriftungen zu überlappen oder in einem schwer lesbaren Winkel zu drehen. Wechsle zu einem horizontalen Balkendiagramm, damit die Beschriftungen ausreichend Platz haben.
+
+<Canvas of={ColumnChartStories.LongLabels} />
+
+## Konfiguration
+
+### Säulendiagramm-Optionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>data</code></td><td><code>Datum[]</code></td><td>—</td><td>Datenpunkte als Array von <code>{'{ label: string; value: number }'}</code> (erforderlich)</td></tr>
+    <tr><td><code>showValueLabels</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Zeigt den Wert oberhalb jeder Säule</td></tr>
+    <tr><td><code>sort</code></td><td><code>'none'</code>, <code>'asc'</code>, <code>'desc'</code></td><td><code>'none'</code></td><td>Sortierreihenfolge der Säulen</td></tr>
+  </tbody>
+</table>
+
+### Gemeinsame Basisoptionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>container</code></td><td><code>HTMLElement</code></td><td>—</td><td>Ziel-DOM-Element (erforderlich)</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>SVG-Titel für Screenreader (<code>aria-labelledby</code>)</td></tr>
+    <tr><td><code>animated</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Ein-/Ausblendanimation beim Rendern</td></tr>
+    <tr><td><code>gridlines</code></td><td><code>{'{ x?: boolean; y?: boolean }'}</code></td><td>—</td><td>Gitterlinien ein-/ausschalten</td></tr>
+    <tr><td><code>xAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der x-Achse</td></tr>
+    <tr><td><code>yAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der y-Achse</td></tr>
+    <tr><td><code>caption</code></td><td><code>string</code></td><td>—</td><td>Bildunterschrift unterhalb des Diagramms</td></tr>
+    <tr><td><code>annotations</code></td><td><code>Annotation[]</code></td><td>—</td><td>Referenzlinien mit optionalem Label (<code>{'{ axis, value, label? }'}</code>)</td></tr>
+    <tr><td><code>colorScheme</code></td><td><code>'categorical'</code>, <code>'sequential'</code>, <code>'diverging'</code></td><td><code>'categorical'</code></td><td>Farbschema</td></tr>
+    <tr><td><code>height</code></td><td><code>number</code></td><td><code>300</code></td><td>Höhe in Pixeln</td></tr>
+    <tr><td><code>minWidth</code></td><td><code>number</code></td><td><code>280</code></td><td>Mindestbreite; darunter erscheint horizontaler Scroll</td></tr>
+    <tr><td><code>margin</code></td><td><code>{'{ top, right, bottom, left }'}</code></td><td><code>20/20/40/50</code></td><td>Innenabstand in Pixeln</td></tr>
+  </tbody>
+</table>
+
+## Barrierefreiheit
+
+Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+
+Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) für eine Referenzimplementierung.

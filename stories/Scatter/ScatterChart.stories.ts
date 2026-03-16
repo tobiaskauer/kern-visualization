@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/html';
 import { ScatterChart } from '../../src/charts/scatter/scatter-chart';
 
 const meta: Meta = {
-  title: 'Charts/ScatterChart',
+  title: 'Charts/ScatterPlot',
   argTypes: {
     xAxisLabel: { control: 'text',    name: 'X Axis Label' },
     yAxisLabel: { control: 'text',    name: 'Y Axis Label' },
@@ -45,8 +45,8 @@ const sampleData = Array.from({ length: 40 }, () => ({
 
 function createChart(args: any): HTMLElement {
   const container = document.createElement('div');
-  container.style.width = '600px';
-  container.style.height = '300px';
+  container.style.maxWidth = '600px';
+  container.style.width = '100%';
 
   requestAnimationFrame(() => {
     new ScatterChart({

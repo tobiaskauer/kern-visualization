@@ -1,28 +1,73 @@
-import { Meta, Story, Canvas } from '@storybook/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
 import * as ScatterChartStories from './ScatterChart.stories';
 
-<Meta title="Docs/ScatterChart" />
+<Meta of={ScatterChartStories} />
 
-# Scatter Chart
+# Streudiagramm
 
-## When to use
+## Wann verwenden
 
-Use a scatter chart to reveal correlation or distribution between two continuous variables. When a third dimension is available, encode it via color using the diverging color scale (the `z` field) to show whether each point sits above or below a midpoint.
+Verwende ein Streudiagramm, um **Korrelation oder Verteilung** zwischen zwei kontinuierlichen Variablen sichtbar zu machen. Jeder Punkt kodiert eine Beobachtung am Schnittpunkt seines x- und y-Werts.
 
-## When NOT to use
+Wenn eine dritte quantitative Dimension verfügbar ist, kodiere sie über **Farbe** mithilfe der divergierenden Farbskala (das Feld `z`). So können Leser:innen erkennen, ob ein Punkt ober- oder unterhalb eines bedeutsamen Mittelpunkts liegt — zum Beispiel, ob ein Produkt über oder unter der Gewinnschwelle liegt.
 
-Avoid scatter charts when the x-axis contains discrete or categorical values — use a bar or column chart instead. With fewer than approximately 10 data points, no reliable pattern can be read from the scatter; prefer a table or simple bar chart.
+Bei dichten Streudiagrammen mit vielen überlagernden Punkten, **reduziere die Deckkraft der Punkte**, damit Cluster als Dichte sichtbar werden und nicht als zusammenhängende Masse.
 
-## Do — scatter with z-encoded color showing correlation
+**Ausreißer beschriften** — Punkte, die weit außerhalb des Hauptclusters liegen, verdienen eine direkte Beschriftung, damit Leser:innen verstehen, was die Anomalie verursacht.
 
-<Canvas>
-  <Story of={ScatterChartStories.Default} />
-</Canvas>
+Eine Regressionslinie sollte nur hinzugefügt werden, wenn die Korrelation tatsächlich stark ist. Eine Trendlinie bei schwachen oder verrauschten Daten impliziert ein Muster, das nicht existiert.
 
-## Don't — too few data points (no pattern readable)
+## Wann NICHT verwenden
 
-With only 4 points, a scatter chart adds visual complexity without conveying a real pattern. A simple bar chart would communicate the same data more directly.
+- **Kategorische x-Achse** — wenn x-Werte diskrete Kategorien sind, verwende ein Balken- oder Säulendiagramm. Streudiagramme setzen kontinuierliche Achsen voraus.
+- **Zu wenige Datenpunkte** — bei weniger als etwa 10 Datenpunkten lässt sich keine zuverlässige Korrelation oder Verteilung ablesen. Verwende stattdessen eine Tabelle oder ein Balkendiagramm.
+- **Mehr als zwei numerische Variablen** — ein Streudiagramm kodiert x und y; eine dritte Dimension über Farbe oder Größe ist akzeptabel, weitere machen das Diagramm unlesbar.
+- **Keine Kausalität implizieren** — Korrelation in einem Streudiagramm belegt keine Ursache-Wirkungs-Beziehung. Untertitel und Achsenbeschriftungen sollten dies widerspiegeln.
 
-<Canvas>
-  <Story of={ScatterChartStories.TooFewPoints} />
-</Canvas>
+## So — Streudiagramm mit farbkodierter dritter Dimension
+
+<Canvas of={ScatterChartStories.Default} />
+
+## So nicht — zu wenige Datenpunkte (kein Muster erkennbar)
+
+Bei nur 4 Punkten fügt ein Streudiagramm visuelle Komplexität hinzu, ohne ein echtes Muster zu zeigen. Ein einfaches Balkendiagramm würde dieselben Daten direkter kommunizieren.
+
+<Canvas of={ScatterChartStories.TooFewPoints} />
+
+## Konfiguration
+
+### Streudiagramm-Optionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>data</code></td><td><code>ScatterDatum[]</code></td><td>—</td><td>Datenpunkte als Array von <code>{'{ x: number; y: number; z?: number }'}</code> (erforderlich)</td></tr>
+    <tr><td><code>zLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der Farbskalen-Legende für die dritte Dimension (<code>z</code>)</td></tr>
+  </tbody>
+</table>
+
+### Gemeinsame Basisoptionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>container</code></td><td><code>HTMLElement</code></td><td>—</td><td>Ziel-DOM-Element (erforderlich)</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>SVG-Titel für Screenreader (<code>aria-labelledby</code>)</td></tr>
+    <tr><td><code>animated</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Ein-/Ausblendanimation beim Rendern</td></tr>
+    <tr><td><code>gridlines</code></td><td><code>{'{ x?: boolean; y?: boolean }'}</code></td><td>—</td><td>Gitterlinien ein-/ausschalten</td></tr>
+    <tr><td><code>xAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der x-Achse</td></tr>
+    <tr><td><code>yAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der y-Achse</td></tr>
+    <tr><td><code>caption</code></td><td><code>string</code></td><td>—</td><td>Bildunterschrift unterhalb des Diagramms</td></tr>
+    <tr><td><code>legend</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Divergierende Farbskalen-Legende ein-/ausschalten</td></tr>
+    <tr><td><code>annotations</code></td><td><code>Annotation[]</code></td><td>—</td><td>Referenzlinien mit optionalem Label (<code>{'{ axis, value, label? }'}</code>)</td></tr>
+    <tr><td><code>height</code></td><td><code>number</code></td><td><code>300</code></td><td>Höhe in Pixeln</td></tr>
+    <tr><td><code>minWidth</code></td><td><code>number</code></td><td><code>280</code></td><td>Mindestbreite; darunter erscheint horizontaler Scroll</td></tr>
+    <tr><td><code>margin</code></td><td><code>{'{ top, right, bottom, left }'}</code></td><td><code>20/20/40/50</code></td><td>Innenabstand in Pixeln</td></tr>
+  </tbody>
+</table>
+
+## Barrierefreiheit
+
+Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+
+Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) for eine Referenzimplementierung.

@@ -1,28 +1,66 @@
-import { Meta, Story, Canvas } from '@storybook/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
 import * as LineChartStories from './LineChart.stories';
 
-<Meta title="Docs/LineChart" />
+<Meta of={LineChartStories} />
 
-# Line Chart
+# Liniendiagramm
 
-## When to use
+## Wann verwenden
 
-Use a line chart when you want to show trends over time or across a continuous ordered dimension. It is ideal for comparing multiple series across the same x-axis, making it easy to spot relative movements and crossover points.
+Verwende ein Liniendiagramm, um **Trends über die Zeit** oder entlang einer kontinuierlichen, geordneten Dimension darzustellen. Linien betonen Richtung und Veränderungsrate zwischen Datenpunkten und machen es leicht, Wachstum, Rückgang und Kreuzungspunkte zwischen Datenreihen zu erkennen.
 
-## When NOT to use
+Liniendiagramme eignen sich am besten für den **Vergleich mehrerer Datenreihen** mit gemeinsamer x-Achse. Begrenze die Anzahl der Linien auf **maximal 4** — darüber hinaus wird das Diagramm unentwirrbar. Bei mehr Datenreihen hebe die wichtigste hervor und stelle die übrigen als gedämpfte Referenzlinien dar.
 
-Do not use a line chart when you have fewer than 3 data points — a bar chart communicates discrete values more clearly. Avoid it for unordered categories, and limit yourself to 5–6 series at most; more lines produce visual clutter that is difficult to untangle.
+Wo möglich, **beschrifte Linien direkt am Endpunkt** statt mit einer separaten Legende, damit Leser:innen nicht hin- und herspringen müssen.
 
-## Do — multi-series trend comparison
+## Wann NICHT verwenden
 
-<Canvas>
-  <Story of={LineChartStories.Default} />
-</Canvas>
+- **Weniger als 3 Datenpunkte** — ein Liniendiagramm mit nur einem oder zwei Punkten zeigt keinen Trend. Verwende ein Balkendiagramm für diskrete Vergleiche.
+- **Ungeordnete Kategorien** — Linien implizieren Kontinuität. Wenn die x-Achse kategorisch ohne inhärente Reihenfolge ist, verwende ein Balkendiagramm.
+- **Mehr als 4 Datenreihen** — zu viele Linien erzeugen visuelles Chaos, das nicht auflösbar ist. Verwende stattdessen Small Multiples.
+- **Teil-Ganzes-Daten** — verwende ein gestapeltes Flächendiagramm, wenn Anteile wichtiger sind als einzelne Trends.
+- **Keine Glättung oder Kurvenanpassung** — sie verzerren die zugrunde liegenden Daten und implizieren Werte, die nie gemessen wurden.
+- **Keine doppelten y-Achsen** — zwei verschiedene Skalen in einem Diagramm machen Vergleiche unzuverlässig und täuschen über relative Größenordnungen.
 
-## Don't — single data point (no trend visible)
+## So — Trendvergleich mehrerer Datenreihen
 
-A line chart with only a single data point renders as a dot and communicates no trend. Use a bar chart for single-point comparisons.
+<Canvas of={LineChartStories.Default} />
 
-<Canvas>
-  <Story of={LineChartStories.SinglePoint} />
-</Canvas>
+
+## Konfiguration
+
+### Liniendiagramm-Optionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>series</code></td><td><code>LineSeries[]</code></td><td>—</td><td>Datenreihen als Array von <code>{'{ name: string; data: Datum[] }'}</code> (erforderlich)</td></tr>
+  </tbody>
+</table>
+
+### Gemeinsame Basisoptionen
+
+<table>
+  <thead><tr><th>Option</th><th>Typ</th><th>Standard</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+    <tr><td><code>container</code></td><td><code>HTMLElement</code></td><td>—</td><td>Ziel-DOM-Element (erforderlich)</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>SVG-Titel für Screenreader (<code>aria-labelledby</code>)</td></tr>
+    <tr><td><code>animated</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Ein-/Ausblendanimation beim Rendern</td></tr>
+    <tr><td><code>gridlines</code></td><td><code>{'{ x?: boolean; y?: boolean }'}</code></td><td>—</td><td>Gitterlinien ein-/ausschalten</td></tr>
+    <tr><td><code>xAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der x-Achse</td></tr>
+    <tr><td><code>yAxisLabel</code></td><td><code>string</code></td><td>—</td><td>Beschriftung der y-Achse</td></tr>
+    <tr><td><code>caption</code></td><td><code>string</code></td><td>—</td><td>Bildunterschrift unterhalb des Diagramms</td></tr>
+    <tr><td><code>legend</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Legende ein-/ausschalten</td></tr>
+    <tr><td><code>annotations</code></td><td><code>Annotation[]</code></td><td>—</td><td>Referenzlinien mit optionalem Label (<code>{'{ axis, value, label? }'}</code>)</td></tr>
+    <tr><td><code>colorScheme</code></td><td><code>'categorical'</code>, <code>'sequential'</code>, <code>'diverging'</code></td><td><code>'categorical'</code></td><td>Farbschema</td></tr>
+    <tr><td><code>height</code></td><td><code>number</code></td><td><code>300</code></td><td>Höhe in Pixeln</td></tr>
+    <tr><td><code>minWidth</code></td><td><code>number</code></td><td><code>280</code></td><td>Mindestbreite; darunter erscheint horizontaler Scroll</td></tr>
+    <tr><td><code>margin</code></td><td><code>{'{ top, right, bottom, left }'}</code></td><td><code>20/20/40/50</code></td><td>Innenabstand in Pixeln</td></tr>
+  </tbody>
+</table>
+
+## Barrierefreiheit
+
+Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+
+Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) für eine Referenzimplementierung.
