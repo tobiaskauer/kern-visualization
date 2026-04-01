@@ -65,6 +65,16 @@ Bei langen Kategoriebeschriftungen zwingen Säulendiagramme dazu, Beschriftungen
 
 ## Barrierefreiheit
 
-Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+Die allgemeinen Chartability-Prinzipien gelten für alle Diagrammtypen — eine Übersicht findest du in der [Einführung](?path=/docs/einführung--docs). Hier die spezifischen Hinweise für das Säulendiagramm:
 
-Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) für eine Referenzimplementierung.
+**Wahrnehmbar** — Bei Zeitreihen auf der x-Achse: Datumsangaben in der Datentabelle im ISO-Format (JJJJ-MM-TT) angeben, damit Screenreader und Hilfstechnologien das Format korrekt interpretieren.
+
+**Bedienbar** — Die Bibliothek implementiert Pfeiltasten-Navigation zwischen Säulen. Den Fokus-Ring nicht mit CSS unterdrücken.
+
+**Verständlich** — `xAxisLabel` und `yAxisLabel` mit Einheiten befüllen. Bei gruppierten Säulen eine Legende mit aussagekräftigen Seriennamen verwenden.
+
+**Kompromittierend (kritisch)** — Datentabelle mit denselben Kategorien und Werten bereitstellen, inklusive Zeitstempel. Empfohlenes Muster: [KERN-Tab-Nav](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193).
+
+**Unterstützend** — Trendrichtung und markante Zeitpunkte (z. B. stärkster Anstieg, Einbruch) in `caption` oder `description` benennen.
+
+**Flexibel** — Die KERN-Farbpalette reagiert automatisch auf `data-kern-theme`. Keine zusätzliche Konfiguration nötig.

@@ -44,6 +44,7 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
       animated: true,
       ...config,
     };
+    this.setupResizeObserver();
   }
 
   protected getTokens(): KernTokens {
@@ -52,9 +53,7 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
 
   protected getInnerWidth(): number {
     const margin = this.config.margin ?? DEFAULT_MARGIN;
-    const totalWidth =
-      this.config.width ?? this.config.container.clientWidth ?? 600;
-    return totalWidth - margin.left - margin.right;
+    return this.getTotalWidth() - margin.left - margin.right;
   }
 
   protected getInnerHeight(): number {
@@ -64,7 +63,9 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
   }
 
   protected getTotalWidth(): number {
-    return this.config.width ?? this.config.container.clientWidth ?? 600;
+    const minWidth = this.config.minWidth ?? 280;
+    const available = this.config.width ?? this.config.container.clientWidth ?? 600;
+    return Math.max(available, minWidth);
   }
 
   protected getTotalHeight(): number {
@@ -76,6 +77,9 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
     d3.select(this.config.container).selectAll('svg').remove();
     this.config.container.querySelector('.kern-chart-legend')?.remove();
     this.config.container.querySelector('.kern-chart-caption')?.remove();
+
+    // Enable horizontal scroll when chart is wider than the container
+    this.config.container.style.overflowX = 'auto';
 
     const margin = this.config.margin ?? DEFAULT_MARGIN;
     const width = this.getTotalWidth();
@@ -107,30 +111,7 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
   }
 
   protected isTooSmall(): boolean {
-    const minWidth = this.config.minWidth ?? 200;
-    const width = this.config.width ?? this.config.container.clientWidth;
-    if (width >= minWidth) return false;
-
-    d3.select(this.config.container).selectAll('svg').remove();
-    this.config.container.querySelector('.kern-chart-legend')?.remove();
-    this.config.container.querySelector('.kern-chart-caption')?.remove();
-
-    const tokens = getTokens(this.config.container);
-    d3.select(this.config.container)
-      .append('svg')
-      .attr('width', width)
-      .attr('height', this.getTotalHeight())
-      .append('text')
-      .attr('x', width / 2)
-      .attr('y', this.getTotalHeight() / 2)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', tokens.colorTextMuted)
-      .attr('font-family', tokens.fontFamily)
-      .attr('font-size', tokens.fontSizeSmall || '12px')
-      .text('Chart too small');
-
-    return true;
+    return false;
   }
 
   abstract render(): void;

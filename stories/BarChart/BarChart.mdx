@@ -67,6 +67,16 @@ Bei mehr als 12 Kategorien wird ein Balkendiagramm kognitiv überfordernd. Leser
 
 ## Barrierefreiheit
 
-Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+Die allgemeinen Chartability-Prinzipien gelten für alle Diagrammtypen — eine Übersicht findest du in der [Einführung](?path=/docs/einführung--docs). Hier die spezifischen Hinweise für das Balkendiagramm:
 
-Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) für eine Referenzimplementierung.
+**Wahrnehmbar** — Das Balkendiagramm verwendet standardmäßig eine einzige Farbe; kein Handlungsbedarf. Bei Mehrfachkategorien (z. B. `colorScheme: 'categorical'`) Farbe nicht als einziges Unterscheidungsmerkmal verwenden — Muster oder Schraffuren ergänzen.
+
+**Bedienbar** — Die Bibliothek implementiert Pfeiltasten-Navigation zwischen Balken (`tabindex="0"` auf dem SVG, `tabindex="-1"` auf den Balken). Den Fokus-Ring nicht mit CSS unterdrücken.
+
+**Verständlich** — `title` und `yAxisLabel` sind besonders wichtig: Die Werteachse ist ohne Einheitsangabe oft mehrdeutig.
+
+**Kompromittierend (kritisch)** — Datentabelle mit denselben Kategorien und Werten bereitstellen. Empfohlenes Muster: [KERN-Tab-Nav](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) — Tab-Navigation zwischen Diagrammansicht und HTML-Tabelle.
+
+**Unterstützend** — Auffällige Balken (Extremwerte, Ausreißer) in `caption` oder `description` benennen, damit Screenreader-Nutzer:innen die Aussage des Diagramms erfassen, ohne jeden Datenpunkt einzeln anzufahren.
+
+**Flexibel** — Die KERN-Farbpalette reagiert automatisch auf `data-kern-theme`. Keine zusätzliche Konfiguration nötig.

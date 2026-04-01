@@ -6,6 +6,7 @@ export interface AxisOptions {
   tickCount?: number;
   tickFormat?: (d: d3.NumberValue) => string;
   innerWidth?: number;
+  innerHeight?: number;
 }
 
 export function renderBottomAxis(
@@ -14,17 +15,24 @@ export function renderBottomAxis(
   options: AxisOptions
 ): void {
   const axis = d3.axisBottom(scale);
-  if (options.tickCount) axis.ticks(options.tickCount);
   if (options.tickFormat) axis.tickFormat(options.tickFormat as (d: d3.NumberValue) => string);
 
-  if (options.innerWidth != null && typeof (scale as any).bandwidth === 'function') {
-    const domain = (scale as any).domain() as string[];
-    const approxLabelWidth = 48;
-    const maxLabels = Math.max(1, Math.floor(options.innerWidth / approxLabelWidth));
-    if (domain.length > maxLabels) {
-      const step = Math.ceil(domain.length / maxLabels);
-      axis.tickValues(domain.filter((_, i) => i % step === 0));
+  if (options.innerWidth != null) {
+    if (typeof (scale as any).bandwidth === 'function') {
+      // Band / point scale — filter every nth label to avoid overlap
+      const domain = (scale as any).domain() as string[];
+      const maxLabels = Math.max(1, Math.floor(options.innerWidth / 48));
+      if (domain.length > maxLabels) {
+        const step = Math.ceil(domain.length / maxLabels);
+        axis.tickValues(domain.filter((_, i) => i % step === 0));
+      }
+    } else {
+      // Linear / time scale — reduce tick count based on available width
+      const count = options.tickCount ?? Math.max(2, Math.floor(options.innerWidth / 60));
+      axis.ticks(count);
     }
+  } else if (options.tickCount) {
+    axis.ticks(options.tickCount);
   }
 
   g.call(axis);
@@ -37,8 +45,13 @@ export function renderLeftAxis(
   options: AxisOptions
 ): void {
   const axis = d3.axisLeft(scale);
-  if (options.tickCount) axis.ticks(options.tickCount);
   if (options.tickFormat) axis.tickFormat(options.tickFormat as (d: d3.NumberValue) => string);
+
+  // Reduce tick count based on available height to avoid cramped labels
+  const count = options.tickCount ?? (options.innerHeight != null
+    ? Math.max(2, Math.floor(options.innerHeight / 40))
+    : undefined);
+  if (count != null) axis.ticks(count);
 
   g.call(axis);
   styleAxis(g, options.tokens);

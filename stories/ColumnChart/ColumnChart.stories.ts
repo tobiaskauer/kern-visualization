@@ -35,8 +35,8 @@ const sampleData = [
 
 function createChart(args: any): HTMLElement {
   const container = document.createElement('div');
-  container.style.width = '600px';
-  container.style.height = '300px';
+  container.style.maxWidth = '600px';
+  container.style.width = '100%';
 
   requestAnimationFrame(() => {
     new ColumnChart({

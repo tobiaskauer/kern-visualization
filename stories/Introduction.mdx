@@ -96,7 +96,39 @@ Diagramme passen sich automatisch der Containerbreite an. Die Mindestbreite betr
 
 ## Barrierefreiheit
 
-Jedes Diagramm ist mit einem SVG-`<title>` für Screenreader ausgestattet und unterstützt Tastaturnavigation: Mit den Pfeiltasten kann zwischen Datenpunkten navigiert werden, `Escape` verlässt das Diagramm. Für maximale Zugänglichkeit empfehlen wir zusätzlich eine Datentabelle als Textalternative — idealerweise über eine Tab-Navigation erreichbar (siehe [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193)).
+KERN Visualization folgt den sieben Prinzipien des [Chartability-Frameworks](https://chartability.fizz.studio/) — einem Prüfrahmen speziell für Datenvisualisierungen, der über den allgemeinen WCAG-Standard hinausgeht.
+
+### POUR + CAF
+
+Die sieben Prinzipien gliedern sich in zwei Gruppen:
+
+**POUR** — die vier WCAG-Grundprinzipien, auf Datenerfahrungen übertragen:
+
+- **Wahrnehmbar** — Informationen müssen ohne Rücksicht auf ein bestimmtes Sinnesorgan zugänglich sein (Sehen, Hören, Berühren).
+- **Bedienbar** — Navigations- und Interaktionsmechanismen müssen für alle Eingabemodalitäten funktionieren (Maus, Tastatur, Touch).
+- **Verständlich** — Inhalt und Bedienung müssen ohne Vorannahmen über das Vorwissen der Nutzenden verständlich sein.
+- **Robust** — Die Darstellung muss mit aktuellen und zukünftigen Hilfstechnologien (Screenreader, Browser-Erweiterungen) zuverlässig funktionieren.
+
+**CAF** — drei Erweiterungsprinzipien, die spezifisch für komplexe Datenerfahrungen gelten:
+
+- **Kompromittierend** — Informationen müssen über mehrere gleichwertige Wege erreichbar sein (z. B. Diagramm und Datentabelle) und die Transparenz über Datenquellen gewährleisten.
+- **Unterstützend** — Die Oberfläche soll kognitive Last aktiv reduzieren: Muster und Trends explizit benennen, Datendichte kontrollieren, Navigation vereinfachen.
+- **Flexibel** — Nutzende sollen persönliche Einstellungen (Kontrast, Schriftgröße, Animationen, Farbpräferenzen) durchsetzen können, ohne dass das Diagramm diese überschreibt.
+
+Die folgende Tabelle zeigt, was die Bibliothek automatisch bereitstellt und was Entwickler:innen selbst umsetzen müssen.
+
+<table>
+  <thead><tr><th>Prinzip</th><th>Was die Bibliothek liefert</th><th>Was Entwickler:innen umsetzen müssen</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Wahrnehmbar</strong></td><td>KERN-Farbpaletten sind kontrastgeprüft; kategorisches, sequenzielles und divergierendes Farbschema verfügbar</td><td>Kein ausschließliches Farbencoding verwenden; <code>title</code> und <code>description</code> immer befüllen</td></tr>
+    <tr><td><strong>Bedienbar</strong></td><td>Tastaturnavigation via Pfeiltasten + Escape; <code>tabindex</code> und <code>aria-label</code> auf Datenpunkten</td><td>Fokus-Indikator nicht mit CSS unterdrücken; interaktive Elemente ≥ 24 × 24 px</td></tr>
+    <tr><td><strong>Verständlich</strong></td><td><code>title</code>, <code>caption</code>, <code>xAxisLabel</code>, <code>yAxisLabel</code> als Konfigurationsoptionen</td><td>Alle Felder befüllen; Einheiten in Achsenbeschriftungen angeben</td></tr>
+    <tr><td><strong>Robust</strong></td><td>SVG <code>role="img"</code>, <code>&lt;title&gt;</code> via <code>aria-labelledby</code>, semantisch valides Markup</td><td>WCAG 2.1 AA prüfen (z. B. mit axe DevTools)</td></tr>
+    <tr><td><strong>Kompromittierend</strong></td><td>—</td><td>Datentabelle mit denselben Werten bereitstellen — idealerweise über das <a href="https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193">KERN-Tab-Nav-Muster</a> erreichbar (kritisch nach Chartability)</td></tr>
+    <tr><td><strong>Unterstützend</strong></td><td>Tooltip mit <code>aria-live="polite"</code> für Screenreader-Ankündigungen</td><td>Trends, Ausreißer und Muster in <code>description</code> oder <code>caption</code> benennen</td></tr>
+    <tr><td><strong>Flexibel</strong></td><td>CSS Custom Properties aus KERN-Token-System; <code>data-kern-theme</code> für Hell/Dunkel-Umschaltung</td><td><code>prefers-reduced-motion</code> berücksichtigen, wenn eigene Animationen ergänzt werden</td></tr>
+  </tbody>
+</table>
 
 ---
 

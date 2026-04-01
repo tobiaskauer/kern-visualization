@@ -61,6 +61,16 @@ Wo möglich, **beschrifte Linien direkt am Endpunkt** statt mit einer separaten 
 
 ## Barrierefreiheit
 
-Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+Die allgemeinen Chartability-Prinzipien gelten für alle Diagrammtypen — eine Übersicht findest du in der [Einführung](?path=/docs/einführung--docs). Hier die spezifischen Hinweise für das Liniendiagramm:
 
-Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) für eine Referenzimplementierung.
+**Wahrnehmbar** — Linien ohne Datenpunkt-Marker sind für Menschen mit eingeschränkter Farbwahrnehmung schwerer voneinander zu unterscheiden. Farbe nicht als einziges Unterscheidungsmerkmal verwenden — bei mehreren Linien Strichmuster (`strokeDasharray`) ergänzen.
+
+**Bedienbar** — Die Bibliothek implementiert Tastaturnavigation entlang der Datenpunkte der ersten Datenreihe. Bei Multi-Line-Charts alle Serien in `description` oder `caption` benennen, damit Nutzer:innen wissen, was navigiert werden kann.
+
+**Verständlich** — Trendrichtung und Wendepunkte in `description` benennen, z. B. „Anstieg um 23 % zwischen März und Juni, danach rückläufig."
+
+**Kompromittierend (kritisch)** — Datentabelle mit einer Spalte pro Datenreihe und einer Zeile pro Datenpunkt bereitstellen. Empfohlenes Muster: [KERN-Tab-Nav](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193).
+
+**Unterstützend** — Auffällige Muster (Kreuzungspunkte, Ausreißer) in `caption` oder `description` benennen.
+
+**Flexibel (kritisch)** — Liniendiagramme sind ein visuell anspruchsvoller Diagrammtyp — Chartability bezeichnet sie als „difficult chart type". Die Datentabelle als alternatives Darstellungsformat ist daher besonders wichtig.

@@ -1,2 +1,17 @@
-<link rel="stylesheet" href="/fonts/fira-sans.css" />
-<link rel="stylesheet" href="/kern.css" />
+<style>
+  .kern-story-wrapper {
+    padding: 24px;
+  }
+  @media (max-width: 480px) {
+    .kern-story-wrapper {
+      padding: 8px;
+    }
+  }
+
+  /* Remove Storybook's built-in docs canvas padding */
+  .docs-story > div,
+  [class^="css-"] > .innerZoomElementWrapper,
+  .sb-story {
+    padding: 0 !important;
+  }
+</style>

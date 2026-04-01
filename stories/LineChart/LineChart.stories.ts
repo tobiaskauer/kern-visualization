@@ -48,8 +48,8 @@ const sampleSeries = [
 
 function createChart(args: any): HTMLElement {
   const container = document.createElement('div');
-  container.style.width = '600px';
-  container.style.height = '300px';
+  container.style.maxWidth = '600px';
+  container.style.width = '100%';
 
   requestAnimationFrame(() => {
     new LineChart({
@@ -84,16 +84,4 @@ export const WithAnnotations: StoryObj = {
   render: (args) => createChart(args),
   name: 'With Annotations',
   args: { annotations: [{ axis: 'y', value: 65, label: 'Zielwert' }] },
-};
-
-const singlePointSeries = [
-  {
-    name: 'Produkt A',
-    data: [{ label: 'Q1', value: 42 }],
-  },
-];
-
-export const SinglePoint: StoryObj = {
-  render: (args) => createChart({ ...args, series: singlePointSeries }),
-  name: 'Single Data Point (Don\'t)',
 };

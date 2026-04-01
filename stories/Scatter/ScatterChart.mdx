@@ -68,6 +68,16 @@ Bei nur 4 Punkten fügt ein Streudiagramm visuelle Komplexität hinzu, ohne ein 
 
 ## Barrierefreiheit
 
-Stelle immer eine Textalternative für die im Diagramm dargestellten Daten bereit. Das empfohlene Muster ist eine **Tab-Navigation**, mit der Nutzer:innen zwischen der Diagrammansicht und einer einfachen HTML-Datentabelle mit denselben Werten wechseln können. So ist die Information auch für Screenreader-Nutzer:innen und alle zugänglich, die Tabellendaten bevorzugen.
+Die allgemeinen Chartability-Prinzipien gelten für alle Diagrammtypen — eine Übersicht findest du in der [Einführung](?path=/docs/einführung--docs). Hier die spezifischen Hinweise für das Streudiagramm:
 
-Siehe das [KERN-Tab-Nav-Muster](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193) for eine Referenzimplementierung.
+**Wahrnehmbar** — Bei Verwendung der dritten Dimension (`z`): Die divergierende Farbskala ist für Menschen mit Rot-Grün-Sehschwäche optimiert. Trotzdem `zLabel` und die Bedeutung beider Skalenpole in `description` textlich erläutern.
+
+**Bedienbar** — Bei vielen Datenpunkten ist Pfeiltasten-Navigation durch alle Punkte nicht praktikabel. Die Datentabelle ist in diesem Fall der primäre zugängliche Zugangsweg.
+
+**Verständlich** — Beide Achsen zwingend mit Einheiten beschriften (`xAxisLabel`, `yAxisLabel`). Wenn eine dritte Dimension kodiert ist, diesen Kanal in `title` oder `description` erläutern.
+
+**Kompromittierend (kritisch)** — Datentabelle ist bei Streudiagrammen besonders wichtig, da visuelle Muster (Cluster, Korrelationen, Ausreißer) ohne Textalternative für Screenreader-Nutzer:innen nicht zugänglich sind. Empfohlenes Muster: [KERN-Tab-Nav](https://gitlab.opencode.de/kern-ux/pattern-library/-/issues/193).
+
+**Unterstützend (kritisch)** — Cluster, Korrelationsrichtung und Ausreißer in `description` oder `caption` benennen — das ist der einzige Weg, diese Muster für nicht-visuelle Zugänge zugänglich zu machen.
+
+**Flexibel** — Die divergierende Farbskala reagiert automatisch auf das aktive KERN-Theme.

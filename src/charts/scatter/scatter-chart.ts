@@ -85,6 +85,9 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
     this.tooltip = new ChartTooltip(this.config.container);
     const tooltip = this.tooltip;
     const tokens = this.tokens;
+    const xLabel = this.config.xAxisLabel ?? 'x';
+    const yLabel = this.config.yAxisLabel ?? 'y';
+    const zLabel = this.config.zLabel ?? 'z';
 
     const circles = g.selectAll<SVGCircleElement, ScatterDatum>('circle')
       .data(data)
@@ -97,8 +100,8 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       .attr('fill-opacity', CHART_CONSTANTS.scatterOpacity)
       .attr('tabindex', '-1')
       .attr('aria-label', (d) => {
-        const zPart = d.z != null ? `, z: ${d.z}` : '';
-        return `(${d.x.toFixed(1)}, ${d.y.toFixed(1)}${zPart})`;
+        const zPart = d.z != null ? `, ${zLabel}: ${d.z}` : '';
+        return `${xLabel}: ${d.x.toFixed(1)}, ${yLabel}: ${d.y.toFixed(1)}${zPart}`;
       })
       .style('cursor', 'pointer')
       .style('outline', 'none');
@@ -122,11 +125,11 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
         }
 
         const rows: { label: string; value: string; color?: string }[] = [
-          { label: 'x', value: d.x.toFixed(1) },
-          { label: 'y', value: d.y.toFixed(1) },
+          { label: xLabel, value: d.x.toFixed(1) },
+          { label: yLabel, value: d.y.toFixed(1) },
         ];
         if (d.z != null) {
-          rows.push({ label: 'z', value: d.z.toFixed(1), color: colorFn(d) });
+          rows.push({ label: zLabel, value: d.z.toFixed(1), color: colorFn(d) });
         }
 
         tooltip.show(`(${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, rows, px, py, tokens);
@@ -184,10 +187,10 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       const px = svgRect.left - containerRect.left + xScale(d.x) + kbMargin.left;
       const py = svgRect.top - containerRect.top + yScale(d.y) + kbMargin.top;
       const rows: { label: string; value: string; color?: string }[] = [
-        { label: 'x', value: d.x.toFixed(1) },
-        { label: 'y', value: d.y.toFixed(1) },
+        { label: xLabel, value: d.x.toFixed(1) },
+        { label: yLabel, value: d.y.toFixed(1) },
       ];
-      if (d.z != null) rows.push({ label: 'z', value: d.z.toFixed(1), color: colorFn(d) });
+      if (d.z != null) rows.push({ label: zLabel, value: d.z.toFixed(1), color: colorFn(d) });
       tooltip.show(`(${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, rows, px, py, tokens);
     })
     .on('focus.kb', () => {
@@ -199,10 +202,10 @@ export class ScatterChart extends BaseChart<ScatterChartConfig> {
       const px = svgRect.left - containerRect.left + xScale(d.x) + kbMargin.left;
       const py = svgRect.top - containerRect.top + yScale(d.y) + kbMargin.top;
       const rows: { label: string; value: string; color?: string }[] = [
-        { label: 'x', value: d.x.toFixed(1) },
-        { label: 'y', value: d.y.toFixed(1) },
+        { label: xLabel, value: d.x.toFixed(1) },
+        { label: yLabel, value: d.y.toFixed(1) },
       ];
-      if (d.z != null) rows.push({ label: 'z', value: d.z.toFixed(1), color: colorFn(d) });
+      if (d.z != null) rows.push({ label: zLabel, value: d.z.toFixed(1), color: colorFn(d) });
       tooltip.show(`(${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, rows, px, py, tokens);
     })
     .on('blur.kb', () => {

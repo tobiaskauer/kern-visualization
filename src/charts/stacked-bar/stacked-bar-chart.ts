@@ -81,10 +81,10 @@ export class StackedBarChart extends BaseChart<StackedBarChartConfig> {
       .attr('height', (d) => yScale(d[0]) - yScale(d[1]))
       .attr('tabindex', '-1')
       .attr('aria-label', function (this: SVGRectElement, d) {
-        const seriesName = (d3.select(this.parentElement as unknown as SVGGElement).datum() as d3.Series<StackedDatum, string>)?.key ?? '';
         const label = (d.data as StackedDatum).label;
-        const value = (d.data as StackedDatum)[seriesName];
-        return `${seriesName} - ${label}: ${value}`;
+        const rowData = d.data as StackedDatum;
+        const allValues = series.map((s) => `${s}: ${rowData[s] ?? 0}`).join(', ');
+        return `${label} — ${allValues}`;
       })
       .style('cursor', 'pointer')
       .style('outline', 'none')
