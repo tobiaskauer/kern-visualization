@@ -7,6 +7,8 @@ export interface KernTokens {
   fontFamily: string;
   fontSizeBase: string;
   fontSizeSmall: string;
+  fontSizeHeadline: string;
+  fontWeightSemiBold: string;
   spaceSmall: string;
   spaceDefault: string;
   borderRadiusSmall: string;
@@ -55,6 +57,8 @@ export function getTokens(container: Element): KernTokens {
     fontFamily: get('--kern-typography-font-family-default'),
     fontSizeBase: get('--kern-font-size-16'),
     fontSizeSmall: get('--kern-font-size-12'),
+    fontSizeHeadline: get('--kern-typography-font-size-static-medium') || '18px',
+    fontWeightSemiBold: get('--kern-typography-font-weight-semi-bold') || '600',
     spaceSmall: get('--kern-metric-space-small'),
     spaceDefault: get('--kern-metric-space-default'),
     borderRadiusSmall: get('--kern-metric-border-radius-small') || '2px',

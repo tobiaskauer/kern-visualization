@@ -4,22 +4,28 @@ import { LineChart } from '../../src/charts/line/line-chart';
 const meta: Meta = {
   title: 'Charts/LineChart',
   argTypes: {
-    xAxisLabel:  { control: 'text',    name: 'X Axis Label' },
-    yAxisLabel:  { control: 'text',    name: 'Y Axis Label' },
-    caption:     { control: 'text',    name: 'Caption' },
-    animated:    { control: 'boolean', name: 'Animated' },
-    gridlinesY:  { control: 'boolean', name: 'Gridlines' },
-    legend:      { control: 'boolean', name: 'Legend' },
-    colorScheme: { control: { type: 'select' }, options: ['categorical', 'sequential', 'diverging'], name: 'Color Scheme' },
+    headline:       { control: 'text', name: 'Überschrift',      table: { category: 'Beschriftung' } },
+    subheadline:    { control: 'text', name: 'Unterüberschrift',  table: { category: 'Beschriftung' } },
+    caption:        { control: 'text', name: 'Caption',           table: { category: 'Beschriftung' } },
+    xAxisLabel:     { control: 'text',    name: 'X Axis Label' },
+    yAxisLabel:     { control: 'text',    name: 'Y Axis Label' },
+    animated:       { control: 'boolean', name: 'Animated' },
+    gridlinesY:     { control: 'boolean', name: 'Gridlines' },
+    legend:         { control: 'boolean', name: 'Legend' },
+    legendPosition: { control: { type: 'select' }, options: ['bottom', 'inline'], name: 'Legend Position' },
+    colorScheme:    { control: { type: 'select' }, options: ['categorical', 'sequential', 'diverging'], name: 'Color Scheme' },
   },
   args: {
-    xAxisLabel:  'Quartal',
-    yAxisLabel:  'Umsatz',
-    caption:     '',
-    animated:    true,
-    gridlinesY:  true,
-    legend:      true,
-    colorScheme: 'categorical',
+    headline:       '',
+    subheadline:    '',
+    xAxisLabel:     'Quartal',
+    yAxisLabel:     'Umsatz',
+    caption:        '',
+    animated:       true,
+    gridlinesY:     true,
+    legend:         true,
+    legendPosition: 'bottom',
+    colorScheme:    'categorical',
   },
 };
 
@@ -57,11 +63,14 @@ function createChart(args: any): HTMLElement {
       series: args.series ?? sampleSeries,
       title: 'Quartalsvergleich',
       animated: args.animated,
+      headline: args.headline || undefined,
+      subheadline: args.subheadline || undefined,
       xAxisLabel: args.xAxisLabel || undefined,
       yAxisLabel: args.yAxisLabel || undefined,
       caption: args.caption || undefined,
       gridlines: { y: args.gridlinesY },
       legend: args.legend,
+      legendPosition: args.legendPosition,
       colorScheme: args.colorScheme,
       annotations: args.annotations,
     }).render();
@@ -84,4 +93,10 @@ export const WithAnnotations: StoryObj = {
   render: (args) => createChart(args),
   name: 'With Annotations',
   args: { annotations: [{ axis: 'y', value: 65, label: 'Zielwert' }] },
+};
+
+export const InlineLabels: StoryObj = {
+  render: (args) => createChart(args),
+  name: 'Inline Labels',
+  args: { legendPosition: 'inline' },
 };

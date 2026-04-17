@@ -4,20 +4,26 @@ import { AreaChart } from '../../src/charts/area/area-chart';
 const meta: Meta = {
   title: 'Charts/AreaChart',
   argTypes: {
-    xAxisLabel: { control: 'text',    name: 'X Axis Label' },
-    yAxisLabel: { control: 'text',    name: 'Y Axis Label' },
-    caption:    { control: 'text',    name: 'Caption' },
-    animated:   { control: 'boolean', name: 'Animated' },
-    gridlinesY: { control: 'boolean', name: 'Gridlines' },
-    legend:     { control: 'boolean', name: 'Legend' },
+    headline:       { control: 'text', name: 'Überschrift',      table: { category: 'Beschriftung' } },
+    subheadline:    { control: 'text', name: 'Unterüberschrift',  table: { category: 'Beschriftung' } },
+    caption:        { control: 'text', name: 'Caption',           table: { category: 'Beschriftung' } },
+    xAxisLabel:     { control: 'text',    name: 'X Axis Label' },
+    yAxisLabel:     { control: 'text',    name: 'Y Axis Label' },
+    animated:       { control: 'boolean', name: 'Animated' },
+    gridlinesY:     { control: 'boolean', name: 'Gridlines' },
+    legend:         { control: 'boolean', name: 'Legend' },
+    legendPosition: { control: { type: 'select' }, options: ['bottom', 'inline'], name: 'Legend Position' },
   },
   args: {
-    xAxisLabel: 'Monat',
-    yAxisLabel: 'Einnahmen (€)',
-    caption:    '',
-    animated:   true,
-    gridlinesY: true,
-    legend:     true,
+    headline:       '',
+    subheadline:    '',
+    xAxisLabel:     'Monat',
+    yAxisLabel:     'Einnahmen (€)',
+    caption:        '',
+    animated:       true,
+    gridlinesY:     true,
+    legend:         true,
+    legendPosition: 'bottom',
   },
 };
 
@@ -59,11 +65,14 @@ function createChart(args: any): HTMLElement {
       series: args.series ?? sampleSeries,
       title: 'Einnahmenverlauf',
       animated: args.animated,
+      headline: args.headline || undefined,
+      subheadline: args.subheadline || undefined,
       xAxisLabel: args.xAxisLabel || undefined,
       yAxisLabel: args.yAxisLabel || undefined,
       caption: args.caption || undefined,
       gridlines: { y: args.gridlinesY },
       legend: args.legend,
+      legendPosition: args.legendPosition,
       annotations: args.annotations,
     }).render();
   });
@@ -85,4 +94,10 @@ export const WithAnnotations: StoryObj = {
   render: (args) => createChart(args),
   name: 'With Annotations',
   args: { annotations: [{ axis: 'y', value: 60, label: 'Zielwert' }] },
+};
+
+export const InlineLabels: StoryObj = {
+  render: (args) => createChart(args),
+  name: 'Inline Labels',
+  args: { legendPosition: 'inline' },
 };

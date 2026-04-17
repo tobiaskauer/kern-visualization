@@ -27,6 +27,9 @@ export interface BaseChartConfig {
   colorScheme?: ColorScheme;
   domainX?: string[];
   domainY?: [number, number];
+  legendPosition?: 'bottom' | 'inline';
+  headline?: string;
+  subheadline?: string;
 }
 
 export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -73,10 +76,49 @@ export abstract class BaseChart<TConfig extends BaseChartConfig> {
   }
 
   protected setupSvg(): d3.Selection<SVGGElement, unknown, null, undefined> {
-    // Remove existing SVG, legend, caption
+    // Remove existing SVG, legend, caption, headline
     d3.select(this.config.container).selectAll('svg').remove();
     this.config.container.querySelector('.kern-chart-legend')?.remove();
     this.config.container.querySelector('.kern-chart-caption')?.remove();
+    this.config.container.querySelector('.kern-chart-headline')?.remove();
+
+    // Headline + subheadline (rendered before SVG so DOM order is correct)
+    if (this.config.headline || this.config.subheadline) {
+      const tokens = this.tokens;
+      const wrap = document.createElement('div');
+      wrap.className = 'kern-chart-headline';
+      wrap.style.cssText = `margin: 0 0 ${tokens.spaceXSmall || '4px'} 0; padding: 0;`;
+
+      if (this.config.headline) {
+        const h = document.createElement('p');
+        h.textContent = this.config.headline;
+        h.style.cssText = [
+          'margin: 0', 'padding: 0',
+          `font-family: ${tokens.fontFamily}`,
+          `font-size: ${tokens.fontSizeHeadline || '18px'}`,
+          `font-weight: ${tokens.fontWeightSemiBold || '600'}`,
+          `color: ${tokens.colorText}`,
+          'line-height: 1.2',
+        ].join(';');
+        wrap.appendChild(h);
+      }
+
+      if (this.config.subheadline) {
+        const sub = document.createElement('p');
+        sub.textContent = this.config.subheadline;
+        sub.style.cssText = [
+          `margin: ${tokens.spaceXSmall || '4px'} 0 0 0`, 'padding: 0',
+          `font-family: ${tokens.fontFamily}`,
+          `font-size: ${tokens.fontSizeBase || '16px'}`,
+          'font-weight: 400',
+          `color: ${tokens.colorTextMuted}`,
+          'line-height: 1.3',
+        ].join(';');
+        wrap.appendChild(sub);
+      }
+
+      this.config.container.appendChild(wrap);
+    }
 
     // Enable horizontal scroll when chart is wider than the container
     this.config.container.style.overflowX = 'auto';

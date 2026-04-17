@@ -6,6 +6,8 @@ import { CHART_CONSTANTS } from '../../constants';
 import type { StackedDatum } from '../stacked-bar/stacked-bar-chart';
 import { ChartTooltip } from '../../utils/tooltip';
 import { renderLegend } from '../../utils/legend';
+import { resolveCollisions } from '../../utils/inline-labels';
+import { DEFAULT_MARGIN } from '../base-chart';
 
 export interface StackedAreaChartConfig extends BaseChartConfig {
   data: StackedDatum[];
@@ -21,8 +23,18 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
       this.tooltip.destroy();
     }
     this.tokens = this.getTokens();
-    const g = this.setupSvg();
     const { data, series } = this.config;
+
+    // Extend right margin when using inline labels
+    const isInline = this.config.legendPosition === 'inline';
+    const baseMargin = { ...(this.config.margin ?? DEFAULT_MARGIN) };
+    if (isInline) {
+      const maxLen = Math.max(...series.map((s) => s.length));
+      const labelArea = Math.max(80, maxLen * 7);
+      this.config.margin = { ...baseMargin, right: baseMargin.right + labelArea };
+    }
+
+    const g = this.setupSvg();
     const innerWidth = this.getInnerWidth();
     const innerHeight = this.getInnerHeight();
 
@@ -71,6 +83,50 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
         .attr('fill-opacity', CHART_CONSTANTS.stackedAreaOpacity)
         .attr('d', areaGen as any);
     });
+
+    // Inline end-of-layer labels (midpoint of each layer at last data index)
+    if (isInline && series.length > 0) {
+      const MIN_LABEL_GAP = 16;
+      const lastIdx = data.length - 1;
+      const naturalPositions = stackedData.map((layer) => {
+        const last = layer[lastIdx];
+        return (yScale(last[0]) + yScale(last[1])) / 2;
+      });
+      const resolved = resolveCollisions(naturalPositions, MIN_LABEL_GAP, [0, innerHeight]);
+
+      stackedData.forEach((layer, i) => {
+        const naturalY = naturalPositions[i];
+        const resolvedY = resolved[i];
+        const color = colorScale(layer.key);
+
+        g.append('circle')
+          .attr('cx', innerWidth)
+          .attr('cy', naturalY)
+          .attr('r', 3)
+          .attr('fill', color)
+          .attr('pointer-events', 'none');
+
+        if (Math.abs(naturalY - resolvedY) > 3) {
+          g.append('line')
+            .attr('x1', innerWidth + 4).attr('y1', naturalY)
+            .attr('x2', innerWidth + 8).attr('y2', resolvedY)
+            .attr('stroke', color)
+            .attr('stroke-width', 1)
+            .attr('stroke-opacity', 0.5)
+            .attr('pointer-events', 'none');
+        }
+
+        g.append('text')
+          .attr('x', innerWidth + 8)
+          .attr('y', resolvedY + 4)
+          .attr('text-anchor', 'start')
+          .attr('fill', color)
+          .attr('font-family', this.tokens.fontFamily)
+          .attr('font-size', this.tokens.fontSizeSmall || '12px')
+          .attr('pointer-events', 'none')
+          .text(layer.key);
+      });
+    }
 
     // Tooltip
     this.tooltip = new ChartTooltip(this.config.container);
@@ -129,12 +185,15 @@ export class StackedAreaChart extends BaseChart<StackedAreaChartConfig> {
 
     this.renderAxisLabels(g, innerWidth, innerHeight, this.tokens);
 
-    // Legend
-    if (this.config.legend !== false) {
+    // Legend (suppressed when using inline labels)
+    if (this.config.legend !== false && !isInline) {
       const legendItems = series.map((s) => ({ name: s, color: colorScale(s) }));
       renderLegend(this.config.container, legendItems, this.tokens);
     }
     this.renderCaption(this.tokens);
+
+    // Restore original margin so ResizeObserver re-renders don't accumulate
+    if (isInline) this.config.margin = baseMargin;
 
     // SVG-level keyboard navigation (ArrowLeft/Right through allLabels)
     const kbMargin = this.config.margin ?? { top: 20, right: 20, bottom: 40, left: 50 };
